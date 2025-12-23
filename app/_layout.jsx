@@ -2,13 +2,16 @@ import { Slot } from "expo-router";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Title from "../components/Title";
+import { ServiceRequestsProvider } from "../contexts/ServiceRequestsContext";
 
 export default function RootLayout() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <Title></Title>
-      <Slot/>
-    </SafeAreaView>
+    <ServiceRequestsProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+        <Title />
+        <Slot />
+      </SafeAreaView>
+    </ServiceRequestsProvider>
   );
 }
 
