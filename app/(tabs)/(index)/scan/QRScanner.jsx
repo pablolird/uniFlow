@@ -2,7 +2,7 @@
 import "@/global.css";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, DeviceEventEmitter, Text, View } from "react-native";
 
 export default function QRCodeScannerScreen() {
@@ -10,6 +10,12 @@ export default function QRCodeScannerScreen() {
   const [result, setResult] = useState();
   const [permission, requestPermission] = useCameraPermissions();
   const { mode } = useLocalSearchParams(); // 'start' or 'finish'
+
+  // Reset scanned state when component mounts
+  useEffect(() => {
+    setScanned(false);
+    setResult(undefined);
+  }, []);
 
   if (!permission) {
     return <View />;
@@ -27,6 +33,8 @@ export default function QRCodeScannerScreen() {
   }
 
   const handleBarCodeScanned = ({ type, data }) => {
+    if (scanned) return; // Prevent multiple scans
+    
     setScanned(true);
     setResult(data);
     
@@ -37,7 +45,13 @@ export default function QRCodeScannerScreen() {
       DeviceEventEmitter.emit("qr-scanned", data);
     }
     
-    router.back();
+    // Use replace instead of back to avoid navigation stack issues
+    // Small delay to ensure event is processed
+    setTimeout(() => {
+      if (router.canGoBack()) {
+        router.back();
+      }
+    }, 100);
   };
 
   const getTitle = () => {

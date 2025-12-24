@@ -47,6 +47,9 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ request }) => {
     }
   };
 
+  // Check if activity is in progress
+  const isInProgress = request.status === "IN_PROGRESS";
+
   return (
     <View className="bg-white p-5 rounded-md w-full shadow-sm shadow-slate-300 mt-3">
       <Text className="text-2xl pb-2">{request.type}</Text>
@@ -103,10 +106,21 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ request }) => {
 
       <Pressable
         onPress={handlePress}
-        className="bg-blue-500 active:bg-blue-400 flex-row rounded-md py-5 justify-center items-center"
+        className={`${
+          isInProgress 
+            ? "bg-green-600 active:bg-green-500" 
+            : "bg-blue-500 active:bg-blue-400"
+        } flex-row rounded-md py-5 justify-center items-center`}
       >
-        <Ionicons name="add" size={icon_size} color={"#fff"} className="pr-1" />
-        <Text className="text-white font-semibold">START ACTIVITY</Text>
+        <Ionicons 
+          name={isInProgress ? "construct" : "add"} 
+          size={icon_size} 
+          color={"#fff"} 
+          className="pr-1" 
+        />
+        <Text className="text-white font-semibold">
+          {isInProgress ? "ACTIVITY IN PROGRESS" : "START ACTIVITY"}
+        </Text>
       </Pressable>
     </View>
   );

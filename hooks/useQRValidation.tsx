@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 interface QRValidationResult {
@@ -6,21 +7,26 @@ interface QRValidationResult {
   error?: string;
 }
 
-export const useQRValidation = (expectedToken: string, formBaseUrl: string) => {
+export const useQRValidation = (expectedToken: string) => {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const validateQR = (scannedData: string): QRValidationResult => {
     try {
-      // Expected format: {FORM_BASE_URL}/v1/assets/{QR_TOKEN}
-      const urlPattern = new RegExp(`^${formBaseUrl}/v1/assets/([A-Za-z0-9_-]{24})$`);
+      // Extract token from the scanned data
+      // Pattern: any URL ending with /v1/assets/{QR_TOKEN}
+      // OR just the token itself
+      const urlPattern = /\/v1\/assets\/([A-Za-z0-9_-]+)$/;
       const match = scannedData.match(urlPattern);
-
-      if (!match) {
-        setValidationError('Invalid QR code format');
-        return { isValid: false, error: 'Invalid QR code format' };
+      
+      let scannedToken: string;
+      
+      if (match) {
+        // If it matches the URL pattern, extract the token from the URL
+        scannedToken = match[1];
+      } else {
+        // Otherwise, treat the entire scanned data as the token
+        scannedToken = scannedData.trim();
       }
-
-      const scannedToken = match[1];
 
       if (scannedToken !== expectedToken) {
         setValidationError('QR code does not match this asset');

@@ -4,7 +4,7 @@ import { useServiceRequests } from "@/contexts/ServiceRequestsContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -19,40 +19,42 @@ import {
 } from "react-native";
 import "../../../../global.css";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000";
-const FORM_BASE_URL = process.env.EXPO_PUBLIC_FORM_BASE_URL || "http://localhost:5173";
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const FORM_BASE_URL =
+  process.env.EXPO_PUBLIC_FORM_BASE_URL || "http://localhost:5173";
 
 export default function Activity() {
   const { id } = useLocalSearchParams();
-  const { scheduledRequests, finishedRequests, refreshRequests } = useServiceRequests();
+  const { scheduledRequests, finishedRequests, refreshRequests } =
+    useServiceRequests();
   const [qrResult, setQrResult] = useState("");
   const [qrError, setQrError] = useState("");
   const [isStarting, setIsStarting] = useState(false);
-  const [activityStarted, setActivityStarted] = useState(false);
+  const isProcessingStart = useRef(false);
 
   // Find the request from either scheduled or finished lists
   const request = [...scheduledRequests, ...finishedRequests].find(
-    req => req.id === id
+    (req) => req.id === id
   );
-
-  // Check if activity is already in progress
-  useEffect(() => {
-    if (request && request.status === "IN_PROGRESS") {
-      setActivityStarted(true);
-    }
-  }, [request]);
 
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener("qr-scanned", async (data) => {
+      // Prevent duplicate processing
+      if (isProcessingStart.current) {
+        console.log("Already processing QR scan, ignoring duplicate");
+        return;
+      }
+
       console.log("QR result:", data);
-      
+
       // Validate QR format and token
       const isValid = validateQR(data);
-      
+
       if (isValid) {
         setQrResult(data);
         setQrError("");
-        
+
         // Start the activity
         await startActivity();
       } else {
@@ -60,23 +62,43 @@ export default function Activity() {
       }
     });
 
-    return () => sub.remove();
+    return () => {
+      sub.remove();
+      isProcessingStart.current = false;
+    };
   }, [request]);
 
   const validateQR = (scannedData: string): boolean => {
     if (!request) return false;
 
     try {
-      // Expected format: {FORM_BASE_URL}/v1/assets/{QR_TOKEN}
-      const expectedUrl = `${FORM_BASE_URL}/v1/assets/${request.asset.qr_token}`;
-      
-      // Accept either the full URL or just the token
-      if (scannedData === request.asset.qr_token || scannedData === expectedUrl) {
+      // Extract token from the scanned data
+      // Pattern: any URL ending with /v1/assets/{QR_TOKEN}
+      // OR just the token itself
+      const urlPattern = /\/v1\/assets\/([A-Za-z0-9_-]+)$/;
+      const match = scannedData.match(urlPattern);
+
+      let scannedToken: string;
+
+      if (match) {
+        // If it matches the URL pattern, extract the token from the URL
+        scannedToken = match[1];
+      } else {
+        // Otherwise, treat the entire scanned data as the token
+        scannedToken = scannedData.trim();
+      }
+
+      // Compare only the tokens
+      if (scannedToken === request.asset.qr_token) {
         return true;
       }
 
-      console.log("IM RETURNING FALSE XD")
-
+      console.log(
+        "Token mismatch - Expected:",
+        request.asset.qr_token,
+        "Got:",
+        scannedToken
+      );
       return false;
     } catch (error) {
       console.error("Error validating QR:", error);
@@ -85,10 +107,11 @@ export default function Activity() {
   };
 
   const startActivity = async () => {
-    if (!request) return;
+    if (!request || isProcessingStart.current) return;
 
+    isProcessingStart.current = true;
     setIsStarting(true);
-    
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/v1/service-requests/${request.id}`,
@@ -109,16 +132,16 @@ export default function Activity() {
 
       // Refresh requests to get updated status
       await refreshRequests();
-      
-      // Navigate to activity in progress screen
-      setActivityStarted(true);
-      Alert.alert("Success", "Activity started successfully!");
+
+      // Don't show alert, just let the UI update naturally
+      console.log("Activity started successfully");
     } catch (error) {
       console.error("Error starting activity:", error);
       Alert.alert("Error", "Failed to start activity. Please try again.");
       setQrError("API call failed");
     } finally {
       setIsStarting(false);
+      isProcessingStart.current = false;
     }
   };
 
@@ -138,10 +161,11 @@ export default function Activity() {
     );
   }
 
-  if (activityStarted || request.status === "IN_PROGRESS") {
+  // Show activity in progress form if status is IN_PROGRESS
+  if (request.status === "IN_PROGRESS") {
     return (
-      <ActivityInProgress 
-        serviceRequestId={request.id} 
+      <ActivityInProgress
+        serviceRequestId={request.id}
         assetQrToken={request.asset.qr_token}
       />
     );
@@ -157,20 +181,26 @@ export default function Activity() {
         <ActivityInfo request={request} />
 
         <View className="items-center pb-5 mt-6">
-          <Text className="text-2xl text-center font-semibold mb-4">Start Activity</Text>
+          <Text className="text-2xl text-center font-semibold mb-4">
+            Start Activity
+          </Text>
           <Text className="text-center text-gray-600 mb-6 px-4">
             Scan the QR code on the asset to begin this service request
           </Text>
 
-          {qrResult !== "" ? (
+          {isStarting ? (
+            <View className="items-center">
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <Text className="mt-4 text-lg text-gray-600">
+                Starting activity...
+              </Text>
+            </View>
+          ) : qrResult !== "" ? (
             <View className="items-center">
               <Ionicons name="checkmark-circle" size={64} color="#10B981" />
               <Text className="mt-3 text-lg font-semibold text-green-600">
-                QR Code Scanned!
+                QR Code Scanned Successfully!
               </Text>
-              {isStarting && (
-                <ActivityIndicator size="large" color="#3B82F6" className="mt-4" />
-              )}
             </View>
           ) : (
             <>
@@ -180,14 +210,19 @@ export default function Activity() {
                   setQrError("");
                   router.push({
                     pathname: "/scan/QRScanner",
-                    params: { mode: "start" }
+                    params: { mode: "start" },
                   });
                 }}
               >
-                <Ionicons className="pr-1" name="qr-code-outline" color={'white'} size={24}/>
+                <Ionicons
+                  className="pr-1"
+                  name="qr-code-outline"
+                  color={"white"}
+                  size={24}
+                />
                 <Text className="text-white text-xl ml-2">Scan QR Code</Text>
               </Pressable>
-              
+
               {qrError && (
                 <View className="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
                   <Text className="text-red-600 text-center">{qrError}</Text>
@@ -202,41 +237,60 @@ export default function Activity() {
 }
 
 // Activity In Progress Component
-function ActivityInProgress({ 
-  serviceRequestId, 
-  assetQrToken 
-}: { 
-  serviceRequestId: string; 
+function ActivityInProgress({
+  serviceRequestId,
+  assetQrToken,
+}: {
+  serviceRequestId: string;
   assetQrToken: string;
 }) {
   const [technicianNotes, setTechnicianNotes] = useState("");
   const [mediaFiles, setMediaFiles] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { refreshRequests } = useServiceRequests();
+  const isProcessingFinish = useRef(false);
 
   useEffect(() => {
-    const sub = DeviceEventEmitter.addListener("qr-scanned-finish", async (data) => {
-      console.log("QR finish result:", data);
-      
-      // Validate QR
-      const expectedUrl = `${FORM_BASE_URL}/v1/assets/${assetQrToken}`;
-      
-      if (data === assetQrToken || data === expectedUrl) {
-        await finishActivity();
-      } else {
-        Alert.alert("Invalid QR", "QR code does not match this asset");
+    const sub = DeviceEventEmitter.addListener(
+      "qr-scanned-finish",
+      async (data) => {
+        console.log("QR finish result:", data);
+
+        // Extract token from scanned data
+        const urlPattern = /\/v1\/assets\/([A-Za-z0-9_-]+)$/;
+        const match = data.match(urlPattern);
+
+        let scannedToken: string;
+        if (match) {
+          scannedToken = match[1];
+        } else {
+          scannedToken = data.trim();
+        }
+
+        // Validate token matches
+        if (scannedToken === assetQrToken) {
+          await finishActivity();
+        } else {
+          Alert.alert("Invalid QR", "QR code does not match this asset");
+        }
       }
-    });
+    );
 
     return () => sub.remove();
   }, [technicianNotes, mediaFiles]);
 
   const finishActivity = async () => {
     if (!technicianNotes.trim()) {
-      Alert.alert("Notes Required", "Please add technician notes before finishing");
+      Alert.alert(
+        "Notes Required",
+        "Please add technician notes before finishing"
+      );
       return;
     }
 
+    if (isProcessingFinish.current) return;
+
+    isProcessingFinish.current = true;
     setIsSubmitting(true);
 
     try {
@@ -267,17 +321,19 @@ function ActivityInProgress({
       // Refresh requests
       await refreshRequests();
 
-      Alert.alert("Success", "Activity completed successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.push("/(tabs)/(index)"),
-        },
-      ]);
+      // Navigate back to scheduled activities
+      router.replace("/(tabs)/(index)");
+
+      // Small delay to ensure navigation completes before showing alert
+      setTimeout(() => {
+        Alert.alert("Success", "Activity completed successfully!");
+      }, 300);
     } catch (error) {
       console.error("Error finishing activity:", error);
       Alert.alert("Error", "Failed to complete activity. Please try again.");
     } finally {
       setIsSubmitting(false);
+      isProcessingFinish.current = false;
     }
   };
 
@@ -330,11 +386,14 @@ function ActivityInProgress({
     });
 
     if (!result.canceled && result.assets[0]) {
-      setMediaFiles([...mediaFiles, {
-        uri: result.assets[0].uri,
-        name: result.assets[0].fileName || "image.jpg",
-        type: result.assets[0].mimeType || "image/jpeg",
-      }]);
+      setMediaFiles([
+        ...mediaFiles,
+        {
+          uri: result.assets[0].uri,
+          name: result.assets[0].fileName || "image.jpg",
+          type: result.assets[0].mimeType || "image/jpeg",
+        },
+      ]);
     }
   };
 
@@ -357,11 +416,14 @@ function ActivityInProgress({
     });
 
     if (!result.canceled && result.assets[0]) {
-      setMediaFiles([...mediaFiles, {
-        uri: result.assets[0].uri,
-        name: "photo.jpg",
-        type: "image/jpeg",
-      }]);
+      setMediaFiles([
+        ...mediaFiles,
+        {
+          uri: result.assets[0].uri,
+          name: "photo.jpg",
+          type: "image/jpeg",
+        },
+      ]);
     }
   };
 
@@ -371,21 +433,24 @@ function ActivityInProgress({
 
   const handleFinishActivity = () => {
     if (!technicianNotes.trim()) {
-      Alert.alert("Notes Required", "Please add technician notes before finishing");
+      Alert.alert(
+        "Notes Required",
+        "Please add technician notes before finishing"
+      );
       return;
     }
 
     // Navigate to QR scanner to finish
     router.push({
       pathname: "/scan/QRScanner",
-      params: { mode: "finish" }
+      params: { mode: "finish" },
     });
   };
 
   return (
     <ScrollView className="flex-1 bg-white px-5 py-6">
       <View className="items-center mb-6">
-        <Ionicons name="construct" size={48} color="#3B82F6" />
+        <Ionicons name="construct" size={48} color="#10B981" />
         <Text className="text-3xl font-bold mt-3">Activity in Progress</Text>
         <Text className="text-gray-600 text-center mt-2">
           Complete the work and add your notes below

@@ -6,7 +6,7 @@ export class _layout extends Component {
   render() {
     return (
       <Stack>
-        <Stack.Screen name="index" options={{ title: 'Scheduled Activities',}} />
+        <Stack.Screen name="index" options={{ title: 'Welcome back, Carlos Gernhofer!',}} />
         <Stack.Screen name="activity/[id]" options={{ title: 'Activity' }} />
         <Stack.Screen name="activity/scan/QRScanner" options={{ title: 'Scanner' }} />
       </Stack>
