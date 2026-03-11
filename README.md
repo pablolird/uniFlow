@@ -1,6 +1,6 @@
-<p align="center">
-  <img width="511" alt="image" src="https://github.com/user-attachments/assets/b8871a01-f254-4d0f-928b-eb0511ad3161" />
-</p>
+<div align="center">
+  <img alt="uniflow-logo" src="https://github.com/user-attachments/assets/43d852b8-a55f-4a0d-88f9-a81bd7f9764a" />
+</div>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/pablolird/uniFlow)
 ![GitHub contributors](https://img.shields.io/github/contributors/pablolird/uniFlow)
