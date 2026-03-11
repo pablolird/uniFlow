@@ -79,7 +79,7 @@ A full-featured web dashboard where operators manage incoming service requests. 
 
 
 <div align="center">
-<img width="585" height="810" alt="uniflow-technician" src="https://github.com/user-attachments/assets/18e299c9-2190-4087-abf9-4614715f2ff0" />
+<img width="250" height="400" alt="uniflow-technician" src="https://github.com/user-attachments/assets/18e299c9-2190-4087-abf9-4614715f2ff0" />
 </div>
 
 A React Native mobile app for field technicians. Shows assigned tasks with location and device details, and uses the device camera to scan QR codes at the start and end of each job.
