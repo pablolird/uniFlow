@@ -1,6 +1,5 @@
 <p align="center">
-<!-- Replace with UniFlow logo image -->
-<!-- Suggested: a clean logo combining a QR code motif with a workflow/flow arrow, centered -->
+  <img width="711" height="274" alt="image" src="https://github.com/user-attachments/assets/b8871a01-f254-4d0f-928b-eb0511ad3161" />
 </p>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/pablolird/uniFlow)
