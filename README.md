@@ -24,7 +24,9 @@
 
 ---
 
-![Capstone A1 Poster_page-0001](https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2)
+<div align="center">
+  <img alt="uniflow-poster" src="https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2" />
+</div>
 
 ---
 
