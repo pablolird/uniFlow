@@ -53,7 +53,9 @@
 
 ### 1. Client Form (`uniFlow-client`)
 
-<img width="450" height="600" alt="uniflow-client" src="https://github.com/user-attachments/assets/2bbebbf1-f035-42ca-851a-fb24aabaa9f2" />
+<div align="center">
+  <img width="450" height="600" alt="uniflow-client" src="https://github.com/user-attachments/assets/2bbebbf1-f035-42ca-851a-fb24aabaa9f2" />
+</div>
 
 A lightweight React web app served when a device QR code is scanned. The client fills out a form describing the issue and can attach photos or videos before submitting.
 
