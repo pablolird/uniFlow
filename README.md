@@ -24,7 +24,7 @@
 
 ---
 
-<!-- Suggested: a short demo video or GIF showing the full workflow — QR scan → form submission → operator dashboard update → technician app notification -->
+[Capstone A1 Poster.pdf](https://github.com/user-attachments/files/25893484/Capstone.A1.Poster.pdf)
 
 ---
 
