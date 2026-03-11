@@ -24,7 +24,7 @@
 
 ---
 
-[Capstone A1 Poster.pdf](https://github.com/user-attachments/files/25893484/Capstone.A1.Poster.pdf)
+![Capstone A1 Poster_page-0001](https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2)
 
 ---
 
