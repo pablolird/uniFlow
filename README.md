@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="1920" height="1080" alt="uniFlow" src="https://github.com/user-attachments/assets/fb4a77ca-3a25-4f2b-a4f0-6de52b1a52bc" />
+  <img width="960" alt="uniFlow" src="https://github.com/user-attachments/assets/fb4a77ca-3a25-4f2b-a4f0-6de52b1a52bc" />
 </div>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/pablolird/uniFlow)
