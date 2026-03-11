@@ -65,7 +65,8 @@ A lightweight React web app served when a device QR code is scanned. The client 
 
 ### 2. Operator Dashboard (`uniFlow-operator`)
 
-<!-- Suggested: screen recording of the operator dashboard — showing the requests table, assigning a technician, and watching a task status change in real time -->
+<img width="1100" height="747" alt="uniflow-operator" src="https://github.com/user-attachments/assets/60e26276-c4e0-438d-acc7-6a6de0ecd99c" />
+
 
 A full-featured web dashboard where operators manage incoming service requests. Built with real-time Socket.io integration so activity state changes appear instantly across all open sessions.
 
