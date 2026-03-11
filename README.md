@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="711" height="274" alt="image" src="https://github.com/user-attachments/assets/b8871a01-f254-4d0f-928b-eb0511ad3161" />
+  <img width="511" alt="image" src="https://github.com/user-attachments/assets/b8871a01-f254-4d0f-928b-eb0511ad3161" />
 </p>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/pablolird/uniFlow)
