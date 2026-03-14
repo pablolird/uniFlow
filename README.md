@@ -15,7 +15,7 @@
 ![TailwindCSS Badge](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=fff&style=for-the-badge)
 ![Socket.io Badge](https://img.shields.io/badge/Socket.io-010101?logo=socketdotio&logoColor=fff&style=for-the-badge)
 
-# utniFlow — Unified Workflow for Technical Service Management
+# uniFlow — Unified Workflow for Technical Service Management
 
 > 🏆 **Winner of the Outstanding Performance Award** — Capstone Project Competition 2025, NTUST
 
