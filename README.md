@@ -1,7 +1,6 @@
-<p align="center">
-<!-- Replace with UniFlow logo image -->
-<!-- Suggested: a clean logo combining a QR code motif with a workflow/flow arrow, centered -->
-</p>
+<div align="center">
+  <img width=960 alt="uniFlow" src="https://github.com/user-attachments/assets/fb4a77ca-3a25-4f2b-a4f0-6de52b1a52bc" />
+</div>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/pablolird/uniFlow)
 ![GitHub contributors](https://img.shields.io/github/contributors/pablolird/uniFlow)
@@ -16,7 +15,7 @@
 ![TailwindCSS Badge](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=fff&style=for-the-badge)
 ![Socket.io Badge](https://img.shields.io/badge/Socket.io-010101?logo=socketdotio&logoColor=fff&style=for-the-badge)
 
-# UniFlow — Unified Workflow for Technical Service Management
+# uniFlow — Unified Workflow for Technical Service Management
 
 > 🏆 **Winner of the Outstanding Performance Award** — Capstone Project Competition 2025, NTUST
 
@@ -24,7 +23,9 @@
 
 ---
 
-<!-- Suggested: a short demo video or GIF showing the full workflow — QR scan → form submission → operator dashboard update → technician app notification -->
+<div align="center">
+  <img height=750 alt="uniflow-poster" src="https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2" />
+</div>
 
 ---
 
@@ -53,7 +54,9 @@
 
 ### 1. Client Form (`uniFlow-client`)
 
-<!-- Suggested: screenshot or short GIF of the QR scan leading to the report form, showing fields and media attachment -->
+<div align="center">
+  <img width="450" height="600" alt="uniflow-client" src="https://github.com/user-attachments/assets/2bbebbf1-f035-42ca-851a-fb24aabaa9f2" />
+</div>
 
 A lightweight React web app served when a device QR code is scanned. The client fills out a form describing the issue and can attach photos or videos before submitting.
 
@@ -63,7 +66,9 @@ A lightweight React web app served when a device QR code is scanned. The client 
 
 ### 2. Operator Dashboard (`uniFlow-operator`)
 
-<!-- Suggested: screen recording of the operator dashboard — showing the requests table, assigning a technician, and watching a task status change in real time -->
+<div align="center">
+<img width="550" height="360" alt="uniflow-operator" src="https://github.com/user-attachments/assets/60e26276-c4e0-438d-acc7-6a6de0ecd99c" />
+</div>
 
 A full-featured web dashboard where operators manage incoming service requests. Built with real-time Socket.io integration so activity state changes appear instantly across all open sessions.
 
@@ -73,7 +78,10 @@ A full-featured web dashboard where operators manage incoming service requests. 
 
 ### 3. Technician Mobile App (`uniFlow-technician`)
 
-<!-- Suggested: screen recording on a physical phone — receiving a task, navigating to the detail screen, scanning the QR code to start, then scanning again to finish -->
+
+<div align="center">
+<img width="250" height="400" alt="uniflow-technician" src="https://github.com/user-attachments/assets/18e299c9-2190-4087-abf9-4614715f2ff0" />
+</div>
 
 A React Native mobile app for field technicians. Shows assigned tasks with location and device details, and uses the device camera to scan QR codes at the start and end of each job.
 
