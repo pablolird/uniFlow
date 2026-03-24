@@ -10,16 +10,20 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 import useFetch from "./hooks/UseFetch";
+import { useAuth } from "./AuthContext";
 
 const RequestContext = createContext();
 
 const RequestProvider = ({ children }) => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const { accessToken } = useAuth();
   const socketRef = useRef(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
 
-  const fetchRequests = async () => {
-    const res = await axios.get(`${apiUrl}/v1/service-requests`);
+  const fetchRequests = async (accessToken) => {
+    const res = await axios.get(`${apiUrl}/v1/service-requests`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
     console.log("Fetched requests:", res);
     const items = res.data.items.map((item) => {
       const date = new Date(item.created_at);
@@ -34,8 +38,8 @@ const RequestProvider = ({ children }) => {
         request_id: item.id,
         request_status: item.status,
         request_type: item.type,
-        company: item.asset.company_name,
-        requester: item.client.name,
+        company: item.asset?.company_name || null,
+        requester: item.client?.name || null,
         device_model: item.asset.model,
         description: item.description_preview,
         client_media: item.client_media || [],
@@ -156,7 +160,7 @@ const RequestProvider = ({ children }) => {
       return;
     }
 
-        if (updateData.type === "TECHNICIAN_MEDIA_ADDED") {
+    if (updateData.type === "TECHNICIAN_MEDIA_ADDED") {
       const requestId = updateData.serviceRequestId;
 
       setLocalRequests((prev) => {
@@ -197,7 +201,8 @@ const RequestProvider = ({ children }) => {
       // 2️⃣ Fetch from API ONLY if WS payload is incomplete
       if (!wsRequest || !wsRequest.asset || !wsRequest.client) {
         const response = await axios.get(
-          `${apiUrl}/v1/service-requests/${requestId}`
+          `${apiUrl}/v1/service-requests/${requestId}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
         );
         apiRequest = response.data;
       }

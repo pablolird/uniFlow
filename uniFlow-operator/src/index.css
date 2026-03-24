@@ -83,7 +83,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(90.5% 0.03583 131.278);
+  --background: oklch(92.494% 0.00011 271.152);
   --foreground: oklch(0.145 0 0);
   --card: oklch(98% 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -164,9 +164,9 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-border border border-transparent border-solid
+  @apply rounded-full bg-border border border-transparent border-solid;
 }

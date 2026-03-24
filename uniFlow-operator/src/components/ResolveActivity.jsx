@@ -15,33 +15,28 @@ import {
 } from "@/components/ui/dialog";
 import { useRequestState } from "../RequestContext";
 import { toast } from "sonner";
+import useFetch from "../hooks/UseFetch";
 
 export default function ResolveActivity({ request }) {
   const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const { refetchRequests } = useRequestState();
 
-  const handleClose = async () => {
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      const payload = {
-        status: "CLOSED"
-      };
-
-      console.log("Closing request:", payload);
-
+  const { fn: closeRequest, loading: submitting, error } = useFetch(
+    async (accessToken) => {
       const response = await axios.patch(
         `${apiUrl}/v1/service-requests/${request.request_id}`,
-        payload
+        { status: "CLOSED" },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
+      return response.data;
+    }
+  );
 
-      console.log("Close response:", response.data);
+  const handleClose = async () => {
+    try {
+      await closeRequest();
 
-      // Refetch the requests to ensure we have the latest data
       if (refetchRequests) {
         await refetchRequests();
       }
@@ -50,20 +45,12 @@ export default function ResolveActivity({ request }) {
         description: `Request has been successfully closed`,
       });
 
-      // Close the dialog
       setOpen(false);
     } catch (err) {
-      console.error("Failed to close request:", err);
-      setError(
-        err.response?.data?.message || 
-        err.message || 
-        "Failed to close request"
-      );
       toast("Error", {
-        description: err.response?.data?.message || err.message || "Failed to close request",
+        description:
+          err.response?.data?.message || err.message || "Failed to close request",
       });
-    } finally {
-      setSubmitting(false);
     }
   };
 

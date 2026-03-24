@@ -24,12 +24,9 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useRequestState } from "../RequestContext";
+import useFetch from "../hooks/UseFetch";
 
 export default function ActivityForm({ request, onSuccess }) {
-  const [technicians, setTechnicians] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const { refetchRequests } = useRequestState();
 
@@ -38,84 +35,86 @@ export default function ActivityForm({ request, onSuccess }) {
   const [notes, setNotes] = useState("");
   const [selectedDate, setSelectedDate] = useState(undefined);
   const [selectedTime, setSelectedTime] = useState("10:30");
+  const [validationError, setValidationError] = useState(null);
+
+  const {
+    data: technicians,
+    loading,
+    error: techError,
+    fn: fetchTechnicians,
+  } = useFetch(async (accessToken) => {
+    const response = await axios.get(`${apiUrl}/v1/technicians`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return response.data;
+  });
+
+  const {
+    fn: submitRequest,
+    loading: submitting,
+    error: submitError,
+  } = useFetch(async (accessToken, payload) => {
+    const response = await axios.patch(
+      `${apiUrl}/v1/service-requests/${request.request_id}`,
+      payload,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    return response.data;
+  });
 
   useEffect(() => {
-    const fetchTechnicians = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${apiUrl}/v1/technicians`);
-        setTechnicians(response.data);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to fetch technicians:", err);
-        setError("Failed to load technicians");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTechnicians();
-  }, [apiUrl]);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!selectedTechnician) {
-      setError("Please select a technician");
+      setValidationError("Please select a technician");
       return;
     }
+    setValidationError(null);
 
-    setSubmitting(true);
-    setError(null);
+    const payload = {
+      status: "SCHEDULED",
+      technician_id: selectedTechnician,
+    };
+
+    if (notes.trim()) {
+      payload.description = notes.trim();
+    }
+
+    if (selectedDate && selectedTime) {
+      const [hours, minutes] = selectedTime.split(":");
+      const dateTime = new Date(selectedDate);
+      dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      payload.scheduled_date = dateTime.toISOString();
+    }
+
+    console.log("Submitting payload:", payload);
 
     try {
-      // Build the payload according to backend UpdateServiceRequestDto
-      const payload = {
-        status: "SCHEDULED",
-        technician_id: selectedTechnician,
-      };
+      await submitRequest(payload);
 
-      // Add optional fields only if they have values
-      if (notes.trim()) {
-        payload.description = notes.trim();
-      }
-
-      if (selectedDate && selectedTime) {
-        const [hours, minutes] = selectedTime.split(":");
-        const dateTime = new Date(selectedDate);
-        dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-        payload.scheduled_date = dateTime.toISOString();
-      }
-
-      console.log("Submitting payload:", payload);
-
-      const response = await axios.patch(
-        `${apiUrl}/v1/service-requests/${request.request_id}`,
-        payload
-      );
-
-      console.log("Update response:", response.data);
-
-      // Refetch the requests to ensure we have the latest data
       if (refetchRequests) {
         await refetchRequests();
       }
 
-      // Success - call the onSuccess callback to close dialog
       if (onSuccess) {
         onSuccess();
       }
-    } catch (err) {
-      console.error("Failed to create activity:", err);
-      setError(
-        err.response?.data?.message || 
-        err.message || 
-        "Failed to create activity"
-      );
-    } finally {
-      setSubmitting(false);
+    } catch {
+      // error captured in submitError state
     }
   };
+
+  const error =
+    validationError ||
+    (techError && "Failed to load technicians") ||
+    (submitError &&
+      (submitError.response?.data?.message ||
+        submitError.message ||
+        "Failed to create activity"));
 
   return (
     <div className="w-full max-w-md p-5 rounded-md shadow-sm bg-card">
@@ -150,14 +149,14 @@ export default function ActivityForm({ request, onSuccess }) {
                   placeholder={
                     loading
                       ? "Loading technicians..."
-                      : error
+                      : techError
                       ? "Error loading technicians"
                       : "Select technician"
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {technicians.map((technician) => (
+                {(technicians || []).map((technician) => (
                   <SelectItem key={technician.id} value={technician.id}>
                     {technician.name}
                   </SelectItem>

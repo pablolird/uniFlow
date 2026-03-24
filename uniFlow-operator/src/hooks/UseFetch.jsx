@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useAuth } from "../AuthContext";
 
 const useFetch = (cb, options = {}) => {
+  // value={{ user, accessToken, authLoading, isAuthenticated, login }
+  const { accessToken } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -9,10 +12,12 @@ const useFetch = (cb, options = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await cb(...args);
+      const response = await cb(accessToken, ...args);
       setData(response);
+      return response;
     } catch (error) {
       setError(error);
+      throw error;
     } finally {
       setLoading(false);
     }
