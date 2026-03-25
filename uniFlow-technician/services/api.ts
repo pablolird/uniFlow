@@ -40,20 +40,26 @@ export interface ServiceRequestsResponse {
 
 export const fetchTechnicianServiceRequests = async (
   technicianId: string,
-  status?: string[]
+  status?: string[],
+  accessToken?: string | null
 ): Promise<ServiceRequestsResponse> => {
   try {
     let url = `${API_BASE_URL}/v1/technicians/${technicianId}/service-requests`;
-    
+
     if (status && status.length > 0) {
       const statusParams = status.map(s => `status=${s}`).join('&');
       url += `?${statusParams}`;
     }
 
-    const response = await fetch(url);
+    const headers: HeadersInit = {};
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+
+    const response = await fetch(url, { headers });
     
     if (!response.ok) {
-      throw new Error(`Failed to fetch service requests: ${response.statusText}`);
+      throw new Error(`Failed to fetch service requests: ${response.status}`);
     }
     
     return await response.json();

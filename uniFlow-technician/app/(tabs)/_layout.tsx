@@ -1,8 +1,10 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import { ServiceRequestsProvider } from "../../contexts/ServiceRequestsContext";
 
 export default function layout() {
   return (
+    <ServiceRequestsProvider>
     <Tabs
       screenOptions={{
         tabBarStyle: { backgroundColor: "#fff", paddingTop: 10, borderTopColor: '#D1D5DB', borderTopWidth: 1 },
@@ -36,5 +38,6 @@ export default function layout() {
         }}
       />
     </Tabs>
+    </ServiceRequestsProvider>
   );
 }

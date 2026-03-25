@@ -1,5 +1,6 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { fetchTechnicianServiceRequests, ServiceRequest } from '../services/api';
+import { useSession } from './AuthContext';
 
 interface ServiceRequestsContextType {
   scheduledRequests: ServiceRequest[];
@@ -24,6 +25,7 @@ interface ServiceRequestsProviderProps {
 }
 
 export const ServiceRequestsProvider: React.FC<ServiceRequestsProviderProps> = ({ children }) => {
+  const { isAuthenticated, accessToken } = useSession();
   const [scheduledRequests, setScheduledRequests] = useState<ServiceRequest[]>([]);
   const [finishedRequests, setFinishedRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,13 +47,15 @@ export const ServiceRequestsProvider: React.FC<ServiceRequestsProviderProps> = (
       // Fetch scheduled requests (PENDING, ASSIGNED, SCHEDULED, IN_PROGRESS)
       const scheduledResponse = await fetchTechnicianServiceRequests(
         technicianId,
-        ['PENDING', 'ASSIGNED', 'SCHEDULED', 'IN_PROGRESS']
+        ['PENDING', 'ASSIGNED', 'SCHEDULED', 'IN_PROGRESS'],
+        accessToken
       );
 
       // Fetch finished requests (RESOLVED, CLOSED)
       const finishedResponse = await fetchTechnicianServiceRequests(
         technicianId,
-        ['RESOLVED', 'CLOSED']
+        ['RESOLVED', 'CLOSED'],
+        accessToken
       );
 
       setScheduledRequests(scheduledResponse.items);
@@ -65,8 +69,10 @@ export const ServiceRequestsProvider: React.FC<ServiceRequestsProviderProps> = (
   };
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    if (isAuthenticated) {
+      fetchRequests();
+    }
+  }, [isAuthenticated]);
 
   const refreshRequests = async () => {
     await fetchRequests();

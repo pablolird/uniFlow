@@ -54,6 +54,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // LOG OUT METHOD IS MISSING
+  // {
+  //      
+  // }
+
   return (
     <AuthContext.Provider
       value={{ user, accessToken, authLoading, isAuthenticated, login }}

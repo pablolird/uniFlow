@@ -1,6 +1,7 @@
 // app/(tabs)/(index)/activity/[id].tsx
 import ActivityInfo from "@/components/ActivityInfo";
 import { useServiceRequests } from "@/contexts/ServiceRequestsContext";
+import { useSession } from "@/contexts/AuthContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -28,6 +29,7 @@ export default function Activity() {
   const { id } = useLocalSearchParams();
   const { scheduledRequests, finishedRequests, refreshRequests } =
     useServiceRequests();
+  const { accessToken } = useSession();
   const [qrResult, setQrResult] = useState("");
   const [qrError, setQrError] = useState("");
   const [isStarting, setIsStarting] = useState(false);
@@ -119,6 +121,7 @@ export default function Activity() {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
           },
           body: JSON.stringify({
             status: "IN_PROGRESS",
@@ -248,6 +251,7 @@ function ActivityInProgress({
   const [mediaFiles, setMediaFiles] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { refreshRequests } = useServiceRequests();
+  const { accessToken } = useSession();
   const isProcessingFinish = useRef(false);
 
   useEffect(() => {
@@ -301,6 +305,7 @@ function ActivityInProgress({
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
           },
           body: JSON.stringify({
             status: "RESOLVED",
@@ -353,6 +358,9 @@ function ActivityInProgress({
         `${API_BASE_URL}/v1/service-requests/${serviceRequestId}/technician-media`,
         {
           method: "POST",
+          headers: {
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
           body: formData,
         }
       );
