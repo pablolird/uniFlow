@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 const useFetch = (cb, options = {}) => {
   // value={{ user, accessToken, authLoading, isAuthenticated, login }

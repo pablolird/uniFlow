@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -23,10 +19,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { useRequestState } from "../RequestContext";
-import useFetch from "../hooks/UseFetch";
+import { Spinner } from "@/components/ui/spinner";
+import { useRequestState } from "@/context/RequestContext";
+import useFetch from "@/hooks/UseFetch";
 
-export default function ActivityForm({ request, onSuccess }) {
+export default function ActivityForm({ request, onSuccess, onCancel }) {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const { refetchRequests } = useRequestState();
 
@@ -117,7 +114,7 @@ export default function ActivityForm({ request, onSuccess }) {
         "Failed to create activity"));
 
   return (
-    <div className="w-full max-w-md p-5 rounded-md shadow-sm bg-card">
+    <div className="w-full max-w-xl p-5 rounded-md shadow-sm bg-card">
       <form
         id="activity-form"
         className="gap-5 flex flex-col"
@@ -150,8 +147,8 @@ export default function ActivityForm({ request, onSuccess }) {
                     loading
                       ? "Loading technicians..."
                       : techError
-                      ? "Error loading technicians"
-                      : "Select technician"
+                        ? "Error loading technicians"
+                        : "Select technician"
                   }
                 />
               </SelectTrigger>
@@ -215,6 +212,21 @@ export default function ActivityForm({ request, onSuccess }) {
             </div>
           </div>
         </FieldGroup>
+        <div className="flex justify-end gap-2 pt-1">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={submitting}>
+            {submitting ? <Spinner /> : "Submit"}
+          </Button>
+        </div>
       </form>
     </div>
   );

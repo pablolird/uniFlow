@@ -4,10 +4,18 @@ import { useServiceRequests } from "@/contexts/ServiceRequestsContext";
 import "@/global.css";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
+} from "react-native";
 
 export default function Scheduled() {
-  const { scheduledRequests, loading, error, refreshRequests } = useServiceRequests();
+  const { scheduledRequests, loading, error, refreshRequests } =
+    useServiceRequests();
   const [refreshing, setRefreshing] = useState(false);
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
@@ -44,7 +52,9 @@ export default function Scheduled() {
     <View className="justify-center items-center flex-1 border-t border-t-gray-300">
       {/* Header with refresh button */}
       <View className="w-full px-5 py-3 flex-row justify-between items-center border-b border-gray-200">
-        <Text className="text-xl font-semibold text-gray-800">Scheduled Activities</Text>
+        <Text className="text-xl font-semibold text-gray-800">
+          Scheduled Activities
+        </Text>
         <Pressable
           onPress={onManualRefresh}
           disabled={manualRefreshing}

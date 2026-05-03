@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { NavLink } from "react-router";
 
 export default function SubmitActivity({ request }) {
   const [open, setOpen] = useState(false);
@@ -21,30 +22,10 @@ export default function SubmitActivity({ request }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-5xl max-h-10/11">
-        <DialogHeader>
-          <DialogTitle>Create Activity</DialogTitle>
-          <DialogDescription>
-            Assign a technician and schedule the service request. The request will be moved to "Scheduled" status.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="main-overlay-content mx-10 gap-10 flex justify-center items-center">
-          <RequestInfo request={request} />
-          <ActivityForm request={request} onSuccess={handleSuccess} />
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button type="submit" form="activity-form">
-            Submit
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Button asChild>
+      <NavLink to={`/schedule_request/${request.request_id}`}>
+        Schedule Request
+      </NavLink>
+    </Button>
   );
 }

@@ -1,58 +1,40 @@
 import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { useNavigate } from "react-router";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  GitBranch,
-  ArrowUpRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function RequestInfo({ request }) {
-  const [images, setImages] = useState([]);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-  const navigate = useNavigate();
+function formatStatus(status) {
+  if (!status) return "—";
+  return status
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-  useEffect(() => {
-    // Check if request has client_media array with images
-    if (
-      request.client_media &&
-      Array.isArray(request.client_media) &&
-      request.client_media.length > 0
-    ) {
-      setLoading(true);
-
-      // Filter for images only and build full URLs
-      const imageUrls = request.client_media
-        .filter((media) => media.kind === "image")
-        .map((media) => {
-          // If URL is already a full URL, use it as is
-          if (media.url.startsWith("http")) {
-            return media.url;
-          }
-          // Otherwise, combine with API base URL
-          return `${apiUrl}${media.url.startsWith("/") ? "" : "/"}${media.url}`;
-        });
-
-      setImages(imageUrls);
-      setLoading(false);
-    } else {
-      setImages([]);
-    }
-  }, [request.client_media, apiUrl]);
-
-  const openLightbox = (index) => {
-    setSelectedImageIndex(index);
+function formatScheduledDate(isoString) {
+  if (!isoString) return null;
+  const date = new Date(isoString);
+  return {
+    date: date.toLocaleDateString(),
+    time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   };
+}
+
+export default function ActivityInfo({ request }) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const images = (request.technician_media || [])
+    .filter((media) => media.kind === "image")
+    .map((media) => {
+      if (media.url.startsWith("http")) return media.url;
+      return `${apiUrl}${media.url.startsWith("/") ? "" : "/"}${media.url}`;
+    });
+
+  const scheduled = formatScheduledDate(request.scheduled_date);
 
   const closeLightbox = (e) => {
-    if (e) {
-      e.stopPropagation();
-    }
+    if (e) e.stopPropagation();
     setSelectedImageIndex(null);
   };
 
@@ -68,7 +50,6 @@ export default function RequestInfo({ request }) {
 
   const handleKeyDown = (e) => {
     if (selectedImageIndex === null) return;
-
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
@@ -85,94 +66,67 @@ export default function RequestInfo({ request }) {
 
   useEffect(() => {
     if (selectedImageIndex !== null) {
-      // Use capture phase to intercept the event before it reaches the Dialog
       window.addEventListener("keydown", handleKeyDown, true);
       return () => window.removeEventListener("keydown", handleKeyDown, true);
     }
   }, [selectedImageIndex]);
 
   return (
-    <div className="flex flex-col justify-center">
-      {request.parent_id && (
-        <div className="max-w-xl mb-4 rounded-md border border-muted bg-card shadow-sm px-4 py-3 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <GitBranch className="w-4 h-4" />
-            Follow-up Request
-          </div>
-          {request.followup_reason && (
-            <p className="text-sm text-foreground">{request.followup_reason}</p>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="self-start"
-            onClick={() => navigate(`/show_request/${request.parent_id}`)}
-          >
-            <ArrowUpRight className="w-4 h-4 mr-1" />
-            View Original Request
-          </Button>
-        </div>
-      )}
-      {!request.parent_id && request.has_followups && (
-        <div className="max-w-xl mb-4 rounded-md border border-muted bg-card shadow-sm px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground">
-          <GitBranch className="w-4 h-4" />
-          This request has a follow-up
-        </div>
-      )}
+    <div className="flex flex-col">
       <div className="max-w-xl">
         <Table>
           <TableBody>
             <TableRow className="h-min">
-              <TableCell className="font-medium">Date</TableCell>
-              <TableCell>{request.date}</TableCell>
+              <TableCell className="font-medium">Status</TableCell>
+              <TableCell>{formatStatus(request.request_status)}</TableCell>
             </TableRow>
 
-            <TableRow className="h-min">
-              <TableCell className="font-medium">Company</TableCell>
-              <TableCell>{request.company}</TableCell>
-            </TableRow>
+            {request.technician && (
+              <TableRow className="h-min">
+                <TableCell className="font-medium">Technician</TableCell>
+                <TableCell>{request.technician}</TableCell>
+              </TableRow>
+            )}
 
-            <TableRow className="h-min">
-              <TableCell className="font-medium">Requester</TableCell>
-              <TableCell>{request.requester}</TableCell>
-            </TableRow>
+            {scheduled && (
+              <>
+                <TableRow className="h-min">
+                  <TableCell className="font-medium">Scheduled Date</TableCell>
+                  <TableCell>{scheduled.date}</TableCell>
+                </TableRow>
+                <TableRow className="h-min">
+                  <TableCell className="font-medium">Scheduled Time</TableCell>
+                  <TableCell>{scheduled.time}</TableCell>
+                </TableRow>
+              </>
+            )}
 
-            <TableRow className="h-min">
-              <TableCell className="font-medium">Device Model</TableCell>
-              <TableCell>{request.device_model}</TableCell>
-            </TableRow>
-
-            <TableRow className="h-max">
-              <TableCell className="font-medium">Description</TableCell>
-              <TableCell variant={"paragraph"}>{request.description}</TableCell>
-            </TableRow>
+            {request.technician_notes && (
+              <TableRow className="h-max">
+                <TableCell className="font-medium">Notes</TableCell>
+                <TableCell variant="paragraph">
+                  {request.technician_notes}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
-        </Table>{" "}
+        </Table>
       </div>
 
-      {/* Media Section */}
       <div className="mt-4 w-[300px] flex justify-center items-center text-center">
-        {/* <p className="font-medium mb-2">Media:</p> */}
-
-        {loading && (
-          <p className="text-sm text-muted-foreground">Loading images...</p>
-        )}
-
-        {!loading && images.length === 0 && (
-          <p className="text-sm text-muted-foreground">No images available</p>
-        )}
-
-        {!loading && images.length > 0 && (
+        {images.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No technician media</p>
+        ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {images.map((imageUrl, index) => (
               <button
                 key={index}
-                onClick={() => openLightbox(index)}
+                onClick={() => setSelectedImageIndex(index)}
                 className="relative aspect-square rounded-md overflow-hidden border-2 border-border hover:border-primary transition-colors cursor-pointer group"
               >
                 <img
                   src={imageUrl}
-                  alt={`Media ${index + 1}`}
+                  alt={`Technician media ${index + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   onError={(e) => {
                     e.target.src =
@@ -186,7 +140,6 @@ export default function RequestInfo({ request }) {
         )}
       </div>
 
-      {/* Lightbox Modal - Using Portal to escape parent constraints */}
       {selectedImageIndex !== null &&
         typeof document !== "undefined" &&
         ReactDOM.createPortal(
@@ -196,15 +149,7 @@ export default function RequestInfo({ request }) {
               e.stopPropagation();
               closeLightbox(e);
             }}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                e.preventDefault();
-                e.stopPropagation();
-                closeLightbox(e);
-              }
-            }}
           >
-            {/* Close Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -212,9 +157,8 @@ export default function RequestInfo({ request }) {
               }}
               className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
               aria-label="Close"
-            ></button>
+            />
 
-            {/* Previous Button */}
             {images.length > 1 && (
               <button
                 onClick={goToPrevious}
@@ -225,19 +169,17 @@ export default function RequestInfo({ request }) {
               </button>
             )}
 
-            {/* Image */}
             <div
               className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
               <img
                 src={images[selectedImageIndex]}
-                alt={`Media ${selectedImageIndex + 1}`}
+                alt={`Technician media ${selectedImageIndex + 1}`}
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
               />
             </div>
 
-            {/* Next Button */}
             {images.length > 1 && (
               <button
                 onClick={goToNext}
@@ -248,7 +190,6 @@ export default function RequestInfo({ request }) {
               </button>
             )}
 
-            {/* Image Counter */}
             {images.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
                 {selectedImageIndex + 1} / {images.length}

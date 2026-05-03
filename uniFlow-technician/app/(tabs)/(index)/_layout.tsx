@@ -5,7 +5,7 @@ export default function IndexLayout() {
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ title: "Welcome back, Nina Johansson!" }}
+        options={{ title: "Welcome back!" }}
       />
       <Stack.Screen name="activity/[id]" options={{ title: "Activity" }} />
       <Stack.Screen

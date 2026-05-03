@@ -1,14 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "./ui/data-table";
 import { createColumnHelper } from "@tanstack/react-table";
-import { useRequestState } from "../RequestContext";
-import SubmitActivity from "./SubmitActivity";
-import ResolveActivity from "./ResolveActivity";
-import ActivityDetails from "./ActivityDetails";
+import { useRequestState } from "@/context/RequestContext";
+import RedirectButton from "./RedirectButton";
 import DefaultHeader from "./ui/default-header";
-import { WifiOff } from "lucide-react";
-import { Wifi } from "lucide-react";
 import { Toaster } from "sonner";
+import { useSearchParams } from "react-router";
+import FollowupBadge from "./FollowupBadge";
 
 const columnHelper = createColumnHelper();
 const pending_columns = [
@@ -32,12 +30,23 @@ const pending_columns = [
     header: (info) => <DefaultHeader info={info} name={"Description"} />,
     cell: (info) => {
       const value = info.getValue();
-      return value && value.length > 20 ? value.slice(0, 20) + "…" : value;
+      const truncated = value && value.length > 20 ? value.slice(0, 20) + "…" : value;
+      return (
+        <span>
+          {truncated}
+          {info.row.original.parent_id && <FollowupBadge />}
+        </span>
+      );
     },
   }),
-  columnHelper.accessor("create_activity", {
-    header: () => "Create Activity",
-    cell: (info) => <SubmitActivity request={info.row.original} />,
+  columnHelper.accessor("schedule_request", {
+    header: () => "Schedule Request",
+    cell: (info) => (
+      <RedirectButton
+        text="Schedule Request"
+        path={`/schedule_request/${info.row.original.request_id}`}
+      />
+    ),
   }),
 ];
 
@@ -67,17 +76,27 @@ const scheduled_columns = [
   }),
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("description", {
-    header: (info) => <DefaultHeader info={info} name={"Description"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <span>
+        {info.getValue()}
+        {info.row.original.parent_id && <FollowupBadge />}
+      </span>
+    ),
   }),
   columnHelper.accessor("technician", {
     header: (info) => (
       <DefaultHeader info={info} name={"Assigned Technician"} />
     ),
     cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("show_request", {
+    header: () => "Details",
+    cell: (info) => (
+      <RedirectButton
+        path={`/show_request/${info.row.original.request_id}`}
+        text="Show Details"
+      />
+    ),
   }),
 ];
 
@@ -107,17 +126,27 @@ const inprogress_columns = [
   }),
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("description", {
-    header: (info) => <DefaultHeader info={info} name={"Description"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <span>
+        {info.getValue()}
+        {info.row.original.parent_id && <FollowupBadge />}
+      </span>
+    ),
   }),
   columnHelper.accessor("technician", {
     header: (info) => (
       <DefaultHeader info={info} name={"Assigned Technician"} />
     ),
     cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("show_request", {
+    header: () => "Details",
+    cell: (info) => (
+      <RedirectButton
+        path={`/show_request/${info.row.original.request_id}`}
+        text="Show Details"
+      />
+    ),
   }),
 ];
 
@@ -148,7 +177,12 @@ const resolved_columns = [
   }),
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <span>
+        {info.getValue()}
+        {info.row.original.parent_id && <FollowupBadge />}
+      </span>
+    ),
   }),
   columnHelper.accessor("technician_notes", {
     header: (info) => <DefaultHeader info={info} name={"Technician Notes"} />,
@@ -163,8 +197,13 @@ const resolved_columns = [
     cell: (info) => info.getValue(),
   }),
   columnHelper.accessor("resolve_activity", {
-    header: () => "Resolve",
-    cell: (info) => <ResolveActivity request={info.row.original} />,
+    header: () => "Close Activity",
+    cell: (info) => (
+      <RedirectButton
+        text="Close"
+        path={`/close_request/${info.row.original.request_id}`}
+      />
+    ),
   }),
 ];
 
@@ -195,7 +234,12 @@ const closed_columns = [
   }),
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <span>
+        {info.getValue()}
+        {info.row.original.parent_id && <FollowupBadge />}
+      </span>
+    ),
   }),
   columnHelper.accessor("technician_notes", {
     header: (info) => <DefaultHeader info={info} name={"Technician Notes"} />,
@@ -209,15 +253,19 @@ const closed_columns = [
     header: (info) => <DefaultHeader info={info} name={"Technician"} />,
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("activity_details", {
-    header: () => "Activity Details",
-    cell: (info) => <ActivityDetails request={info.row.original} />,
+  columnHelper.accessor("show_request", {
+    header: () => "Details",
+    cell: (info) => (
+      <RedirectButton
+        path={`/show_request/${info.row.original.request_id}`}
+        text="Show Details"
+      />
+    ),
   }),
 ];
 
 export default function Dashboard() {
-  const { requests, isSocketConnected } = useRequestState();
-
+  const { requests } = useRequestState();
   const filteredRequests = {
     pending: requests.filter((r) => r.request_status === "PENDING"),
     scheduled: requests.filter((r) => r.request_status === "SCHEDULED"),
@@ -226,64 +274,52 @@ export default function Dashboard() {
     closed: requests.filter((r) => r.request_status === "CLOSED"),
   };
 
+  const [searchParams] = useSearchParams();
+
+  const defaultTab = searchParams.get("status") || "PENDING";
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       <Toaster></Toaster>
       <Tabs
-        defaultValue="pending"
+        defaultValue={defaultTab}
         className="bg-background w-full h-full flex flex-col justify-start items-center"
       >
         <TabsList className="mt-5">
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
-          <TabsTrigger value="in-progress">In progress</TabsTrigger>
-          <TabsTrigger value="resolved">Resolved</TabsTrigger>
-          <TabsTrigger value="closed">Closed</TabsTrigger>
+          <TabsTrigger value="PENDING">Pending</TabsTrigger>
+          <TabsTrigger value="SCHEDULED">Scheduled</TabsTrigger>
+          <TabsTrigger value="IN_PROGRESS">In progress</TabsTrigger>
+          <TabsTrigger value="RESOLVED">Resolved</TabsTrigger>
+          <TabsTrigger value="CLOSED">Closed</TabsTrigger>
         </TabsList>
-        <TabsContent value="pending" className="h-full">
+        <TabsContent value="PENDING" className="h-full">
           <DataTable
             columns={pending_columns}
             data={filteredRequests.pending}
           />
         </TabsContent>
-        <TabsContent className="h-full" value="scheduled">
+        <TabsContent className="h-full" value="SCHEDULED">
           <DataTable
             columns={scheduled_columns}
             data={filteredRequests.scheduled}
           />
         </TabsContent>
-        <TabsContent className="h-full" value="in-progress">
+        <TabsContent className="h-full" value="IN_PROGRESS">
           <DataTable
             columns={inprogress_columns}
             data={filteredRequests.in_progress}
           />
         </TabsContent>
-        <TabsContent className="h-full" value="resolved">
+        <TabsContent className="h-full" value="RESOLVED">
           <DataTable
             columns={resolved_columns}
             data={filteredRequests.resolved}
           />
         </TabsContent>
-        <TabsContent className="h-full" value="closed">
-          <DataTable
-            columns={closed_columns}
-            data={filteredRequests.closed}
-          />
+        <TabsContent className="h-full" value="CLOSED">
+          <DataTable columns={closed_columns} data={filteredRequests.closed} />
         </TabsContent>
       </Tabs>
-      <div className="absolute flex gap-1 p-1 bottom-0 left-0">
-        {isSocketConnected ? (
-          <>
-            <Wifi className="text-green-500 animate-blink" />
-            <p className="text-green-500 animate-blink">Connected</p>
-          </>
-        ) : (
-          <>
-            <WifiOff className="text-red-500 animate-blink" />
-            <p className="text-red-500 animate-blink">Disconnected</p>
-          </>
-        )}
-      </div>
     </div>
   );
 }

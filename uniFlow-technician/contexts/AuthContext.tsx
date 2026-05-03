@@ -13,20 +13,24 @@ const AuthContext = createContext<{
   user: string | null;
   authLoading: boolean;
   accessToken: string | null;
+  technicianId: string | null;
   isAuthenticated: boolean;
 }>({
-  login: async (username: string, password: string) => {},
+  login: async (_username: string, _password: string) => {},
   //   logout: () => null,
   user: null,
   authLoading: false,
   accessToken: null,
+  technicianId: null,
   isAuthenticated: false,
 });
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
+
 export function AuthProvider({ children }: PropsWithChildren) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [technicianId, setTechnicianId] = useState<string | null>(null);
   const [user, setUser] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(false);
   const isAuthenticated = !!accessToken;
@@ -35,25 +39,32 @@ export function AuthProvider({ children }: PropsWithChildren) {
     try {
       setAuthLoading(true);
 
-      const response = await fetch(`${API_BASE_URL}/v1/auth/login`, {
+      const loginResponse = await fetch(`${API_BASE_URL}/v1/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
+        body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) {
-        throw new Error(response.status.toString());
+      if (!loginResponse.ok) {
+        throw new Error(loginResponse.status.toString());
       }
 
-      const data = await response.json();
-      console.log(data);
+      const { access_token } = await loginResponse.json();
 
-      setAccessToken(data.access_token);
+      const profileResponse = await fetch(`${API_BASE_URL}/v1/auth/profile`, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
+
+      if (!profileResponse.ok) {
+        throw new Error(profileResponse.status.toString());
+      }
+
+      const profile = await profileResponse.json();
+
+      setAccessToken(access_token);
+      setTechnicianId(profile.technicianId ?? null);
       setUser(username);
     } catch (e) {
       console.log(e);
@@ -70,7 +81,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   return (
     <AuthContext.Provider
-      value={{ login, accessToken, user, authLoading, isAuthenticated }}
+      value={{ login, accessToken, technicianId, user, authLoading, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>

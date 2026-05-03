@@ -1,6 +1,15 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { fetchTechnicianServiceRequests, ServiceRequest } from '../services/api';
-import { useSession } from './AuthContext';
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  fetchTechnicianServiceRequests,
+  ServiceRequest,
+} from "../services/api";
+import { useSession } from "./AuthContext";
 
 interface ServiceRequestsContextType {
   scheduledRequests: ServiceRequest[];
@@ -10,12 +19,16 @@ interface ServiceRequestsContextType {
   refreshRequests: () => Promise<void>;
 }
 
-const ServiceRequestsContext = createContext<ServiceRequestsContextType | undefined>(undefined);
+const ServiceRequestsContext = createContext<
+  ServiceRequestsContextType | undefined
+>(undefined);
 
 export const useServiceRequests = () => {
   const context = useContext(ServiceRequestsContext);
   if (!context) {
-    throw new Error('useServiceRequests must be used within a ServiceRequestsProvider');
+    throw new Error(
+      "useServiceRequests must be used within a ServiceRequestsProvider",
+    );
   }
   return context;
 };
@@ -24,18 +37,22 @@ interface ServiceRequestsProviderProps {
   children: ReactNode;
 }
 
-export const ServiceRequestsProvider: React.FC<ServiceRequestsProviderProps> = ({ children }) => {
-  const { isAuthenticated, accessToken } = useSession();
-  const [scheduledRequests, setScheduledRequests] = useState<ServiceRequest[]>([]);
-  const [finishedRequests, setFinishedRequests] = useState<ServiceRequest[]>([]);
+export const ServiceRequestsProvider: React.FC<
+  ServiceRequestsProviderProps
+> = ({ children }) => {
+  const { isAuthenticated, accessToken, technicianId } = useSession();
+  const [scheduledRequests, setScheduledRequests] = useState<ServiceRequest[]>(
+    [],
+  );
+  const [finishedRequests, setFinishedRequests] = useState<ServiceRequest[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const technicianId = process.env.EXPO_PUBLIC_TECHNICIAN_ID;
-
   const fetchRequests = async () => {
     if (!technicianId) {
-      setError('Technician ID not configured');
+      setError("Technician ID not available");
       setLoading(false);
       return;
     }
@@ -44,25 +61,25 @@ export const ServiceRequestsProvider: React.FC<ServiceRequestsProviderProps> = (
       setLoading(true);
       setError(null);
 
-      // Fetch scheduled requests (PENDING, ASSIGNED, SCHEDULED, IN_PROGRESS)
+      // Fetch scheduled requests (PENDING, SCHEDULED, IN_PROGRESS)
       const scheduledResponse = await fetchTechnicianServiceRequests(
         technicianId,
-        ['PENDING', 'ASSIGNED', 'SCHEDULED', 'IN_PROGRESS'],
-        accessToken
+        ["PENDING", "SCHEDULED", "IN_PROGRESS"],
+        accessToken,
       );
 
       // Fetch finished requests (RESOLVED, CLOSED)
       const finishedResponse = await fetchTechnicianServiceRequests(
         technicianId,
-        ['RESOLVED', 'CLOSED'],
-        accessToken
+        ["RESOLVED", "CLOSED"],
+        accessToken,
       );
 
       setScheduledRequests(scheduledResponse.items);
       setFinishedRequests(finishedResponse.items);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch requests');
-      console.error('Error fetching requests:', err);
+      setError(err instanceof Error ? err.message : "Failed to fetch requests");
+      console.error("Error fetching requests:", err);
     } finally {
       setLoading(false);
     }

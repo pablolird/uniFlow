@@ -1,11 +1,11 @@
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-console.log(`BASE URL: ${API_BASE_URL}`)
+console.log(`BASE URL: ${API_BASE_URL}`);
 
 export interface ServiceRequest {
   id: string;
   created_at: string;
-  type: 'MAINTENANCE' | 'MALFUNCTION';
-  status: 'PENDING' | 'ASSIGNED' | 'SCHEDULED' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  type: "MAINTENANCE" | "MALFUNCTION";
+  status: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
   description_preview: string;
   client_media?: Array<{ url: string; kind: string }>;
   technician_media?: Array<{ url: string; kind: string }> | null;
@@ -29,6 +29,9 @@ export interface ServiceRequest {
   };
   technician_notes?: string | null;
   scheduled_date?: string | null;
+  parent_id?: string | null;
+  followup_reason?: string | null;
+  has_followups?: boolean;
 }
 
 export interface ServiceRequestsResponse {
@@ -41,30 +44,31 @@ export interface ServiceRequestsResponse {
 export const fetchTechnicianServiceRequests = async (
   technicianId: string,
   status?: string[],
-  accessToken?: string | null
+  accessToken?: string | null,
 ): Promise<ServiceRequestsResponse> => {
   try {
     let url = `${API_BASE_URL}/v1/technicians/${technicianId}/service-requests`;
 
     if (status && status.length > 0) {
-      const statusParams = status.map(s => `status=${s}`).join('&');
+      const statusParams = status.map((s) => `status=${s}`).join("&");
       url += `?${statusParams}`;
     }
 
     const headers: HeadersInit = {};
     if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`;
+      headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
     const response = await fetch(url, { headers });
-    
+
     if (!response.ok) {
+      console.log(Error);
       throw new Error(`Failed to fetch service requests: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error fetching service requests:', error);
+    console.error("Error fetching service requests:", error);
     throw error;
   }
 };

@@ -13,25 +13,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useRequestState } from "../RequestContext";
+import { useRequestState } from "@/context/RequestContext";
 import { toast } from "sonner";
-import useFetch from "../hooks/UseFetch";
+import useFetch from "@/hooks/UseFetch";
 
 export default function ResolveActivity({ request }) {
   const [open, setOpen] = useState(false);
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const { refetchRequests } = useRequestState();
 
-  const { fn: closeRequest, loading: submitting, error } = useFetch(
-    async (accessToken) => {
-      const response = await axios.patch(
-        `${apiUrl}/v1/service-requests/${request.request_id}`,
-        { status: "CLOSED" },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      return response.data;
-    }
-  );
+  const {
+    fn: closeRequest,
+    loading: submitting,
+    error,
+  } = useFetch(async (accessToken) => {
+    const response = await axios.patch(
+      `${apiUrl}/v1/service-requests/${request.request_id}`,
+      { status: "CLOSED" },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    return response.data;
+  });
 
   const handleClose = async () => {
     try {
@@ -49,7 +51,9 @@ export default function ResolveActivity({ request }) {
     } catch (err) {
       toast("Error", {
         description:
-          err.response?.data?.message || err.message || "Failed to close request",
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to close request",
       });
     }
   };
@@ -75,12 +79,11 @@ export default function ResolveActivity({ request }) {
         )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" disabled={submitting}>Cancel</Button>
+            <Button variant="outline" disabled={submitting}>
+              Cancel
+            </Button>
           </DialogClose>
-          <Button 
-            onClick={handleClose}
-            disabled={submitting}
-          >
+          <Button onClick={handleClose} disabled={submitting}>
             {submitting ? "Closing..." : "Close Request"}
           </Button>
         </DialogFooter>

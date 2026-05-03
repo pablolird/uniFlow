@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from "react-native";
 import { useSession } from "../contexts/AuthContext";
 
@@ -28,68 +30,78 @@ export default function SignIn() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", padding: 24 }}>
-      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 32 }}>
-        Sign In
-      </Text>
-
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: "#D1D5DB",
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          fontSize: 16,
-        }}
-        placeholder="Username"
-        autoCapitalize="none"
-        autoCorrect={false}
-        value={username}
-        onChangeText={setUsername}
-      />
-
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: "#D1D5DB",
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 8,
-          fontSize: 16,
-        }}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      {error && (
-        <Text style={{ color: "#EF4444", marginBottom: 16, fontSize: 14 }}>
-          {error}
-        </Text>
-      )}
-
-      <TouchableOpacity
-        onPress={handleLogin}
-        disabled={authLoading}
-        style={{
-          backgroundColor: "#111827",
-          borderRadius: 8,
-          padding: 14,
-          alignItems: "center",
-          marginTop: 8,
-          opacity: authLoading ? 0.6 : 1,
-        }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
+        keyboardShouldPersistTaps="handled"
       >
-        {authLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
-            Sign In
+        <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 32 }}>
+          Sign In
+        </Text>
+
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            borderRadius: 8,
+            padding: 12,
+            marginBottom: 16,
+            fontSize: 16,
+          }}
+          placeholderTextColor="gray"
+          placeholder="Username"
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={username}
+          onChangeText={setUsername}
+        />
+
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            borderRadius: 8,
+            padding: 12,
+            marginBottom: 8,
+            fontSize: 16,
+          }}
+          placeholderTextColor="gray"
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        {error && (
+          <Text style={{ color: "#EF4444", marginBottom: 16, fontSize: 14 }}>
+            {error}
           </Text>
         )}
-      </TouchableOpacity>
-    </View>
+
+        <TouchableOpacity
+          onPress={handleLogin}
+          disabled={authLoading}
+          style={{
+            backgroundColor: "#111827",
+            borderRadius: 8,
+            padding: 14,
+            alignItems: "center",
+            marginTop: 8,
+            opacity: authLoading ? 0.6 : 1,
+          }}
+        >
+          {authLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
+              Sign In
+            </Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

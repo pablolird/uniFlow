@@ -12,6 +12,7 @@ import {
   DeviceEventEmitter,
   Image,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -170,6 +171,7 @@ export default function Activity() {
       <ActivityInProgress
         serviceRequestId={request.id}
         assetQrToken={request.asset.qr_token}
+        description={request.description_preview}
       />
     );
   }
@@ -243,13 +245,17 @@ export default function Activity() {
 function ActivityInProgress({
   serviceRequestId,
   assetQrToken,
+  description,
 }: {
   serviceRequestId: string;
   assetQrToken: string;
+  description: string;
 }) {
   const [technicianNotes, setTechnicianNotes] = useState("");
   const [mediaFiles, setMediaFiles] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [needsFollowUp, setNeedsFollowUp] = useState(false);
+  const [followUpReason, setFollowUpReason] = useState("");
   const { refreshRequests } = useServiceRequests();
   const { accessToken } = useSession();
   const isProcessingFinish = useRef(false);
@@ -281,7 +287,7 @@ function ActivityInProgress({
     );
 
     return () => sub.remove();
-  }, [technicianNotes, mediaFiles]);
+  }, [technicianNotes, mediaFiles, needsFollowUp, followUpReason]);
 
   const finishActivity = async () => {
     if (!technicianNotes.trim()) {
@@ -297,16 +303,17 @@ function ActivityInProgress({
     isProcessingFinish.current = true;
     setIsSubmitting(true);
 
+    const authHeader = accessToken
+      ? { Authorization: `Bearer ${accessToken}` }
+      : {};
+
     try {
-      // Update service request status to RESOLVED
-      const response = await fetch(
+      // Step 1: Resolve the service request
+      const resolveResponse = await fetch(
         `${API_BASE_URL}/v1/service-requests/${serviceRequestId}`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-          },
+          headers: { "Content-Type": "application/json", ...authHeader },
           body: JSON.stringify({
             status: "RESOLVED",
             technician_notes: technicianNotes,
@@ -314,28 +321,64 @@ function ActivityInProgress({
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to update service request");
+      if (!resolveResponse.ok) {
+        const body = await resolveResponse.text().catch(() => "");
+        console.error(`Resolve failed: ${resolveResponse.status}`, body);
+        throw new Error("Failed to resolve service request");
       }
 
-      // Upload media if any
+      // Step 2: Create follow-up once parent is confirmed RESOLVED
+      let followUpFailed = false;
+      if (needsFollowUp) {
+        const followUpResponse = await fetch(
+          `${API_BASE_URL}/v1/service-requests/${serviceRequestId}/follow-up`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...authHeader },
+            body: JSON.stringify({
+              followup_reason: followUpReason.trim(),
+              description: description || technicianNotes,
+            }),
+          }
+        );
+
+        if (!followUpResponse.ok) {
+          const body = await followUpResponse.text().catch(() => "");
+          console.error(
+            `Follow-up creation failed: ${followUpResponse.status}`,
+            body
+          );
+          followUpFailed = true;
+        }
+      }
+
+      // Step 3: Upload media if any
       if (mediaFiles.length > 0) {
         await uploadMedia();
       }
 
-      // Refresh requests
+      // Step 4: Refresh and navigate
       await refreshRequests();
-
-      // Navigate back to scheduled activities
       router.replace("/(tabs)/(index)");
 
-      // Small delay to ensure navigation completes before showing alert
       setTimeout(() => {
-        Alert.alert("Success", "Activity completed successfully!");
+        if (followUpFailed) {
+          Alert.alert(
+            "Partially Completed",
+            "Activity resolved, but the follow-up request could not be created. Please inform your operator."
+          );
+        } else {
+          Alert.alert(
+            "Success",
+            needsFollowUp
+              ? "Activity completed. A follow-up request has been created."
+              : "Activity completed successfully!"
+          );
+        }
       }, 300);
     } catch (error) {
       console.error("Error finishing activity:", error);
-      Alert.alert("Error", "Failed to complete activity. Please try again.");
+      Alert.alert("Error", "Failed to resolve the activity. Please try again.");
     } finally {
       setIsSubmitting(false);
       isProcessingFinish.current = false;
@@ -448,6 +491,14 @@ function ActivityInProgress({
       return;
     }
 
+    if (needsFollowUp && followUpReason.trim().length < 5) {
+      Alert.alert(
+        "Follow-up Reason Required",
+        "Please provide a reason for the follow-up (at least 5 characters)"
+      );
+      return;
+    }
+
     // Navigate to QR scanner to finish
     router.push({
       pathname: "/scan/QRScanner",
@@ -456,7 +507,14 @@ function ActivityInProgress({
   };
 
   return (
-    <ScrollView className="flex-1 bg-white px-5 py-6">
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+    <ScrollView
+      className="flex-1 bg-white px-5 py-6"
+      keyboardShouldPersistTaps="handled"
+    >
       <View className="items-center mb-6">
         <Ionicons name="construct" size={48} color="#10B981" />
         <Text className="text-3xl font-bold mt-3">Activity in Progress</Text>
@@ -523,6 +581,44 @@ function ActivityInProgress({
         )}
       </View>
 
+      <View className="mb-6">
+        <Pressable
+          onPress={() => setNeedsFollowUp(!needsFollowUp)}
+          className="flex-row items-center"
+        >
+          <View
+            className={`w-6 h-6 rounded border-2 mr-3 items-center justify-center ${
+              needsFollowUp
+                ? "bg-blue-500 border-blue-500"
+                : "border-gray-400 bg-white"
+            }`}
+          >
+            {needsFollowUp && (
+              <Ionicons name="checkmark" size={16} color="white" />
+            )}
+          </View>
+          <Text className="text-lg font-semibold">Needs follow-up</Text>
+        </Pressable>
+
+        {needsFollowUp && (
+          <View className="mt-3">
+            <Text className="text-base text-gray-700 mb-2">
+              Follow-up reason *
+            </Text>
+            <TextInput
+              className="bg-white border border-gray-300 rounded-md p-4 min-h-20 text-base"
+              placeholder="Why does this request need a follow-up visit?"
+              placeholderTextColor="#9CA3AF"
+              multiline
+              numberOfLines={3}
+              value={followUpReason}
+              onChangeText={setFollowUpReason}
+              textAlignVertical="top"
+            />
+          </View>
+        )}
+      </View>
+
       <Pressable
         onPress={handleFinishActivity}
         disabled={isSubmitting}
@@ -542,5 +638,6 @@ function ActivityInProgress({
         )}
       </Pressable>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
