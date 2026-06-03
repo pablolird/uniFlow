@@ -2,14 +2,8 @@ import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-function formatStatus(status) {
-  if (!status) return "—";
-  return status
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+import StatusBadge from "@/components/StatusBadge";
+import TechnicianLink from "@/components/TechnicianLink";
 
 function formatScheduledDate(isoString) {
   if (!isoString) return null;
@@ -78,13 +72,18 @@ export default function ActivityInfo({ request }) {
           <TableBody>
             <TableRow className="h-min">
               <TableCell className="font-medium">Status</TableCell>
-              <TableCell>{formatStatus(request.request_status)}</TableCell>
+              <TableCell><StatusBadge status={request.request_status} /></TableCell>
             </TableRow>
 
             {request.technician && (
               <TableRow className="h-min">
                 <TableCell className="font-medium">Technician</TableCell>
-                <TableCell>{request.technician}</TableCell>
+                <TableCell>
+                  <TechnicianLink
+                    name={request.technician}
+                    id={request.technician_id}
+                  />
+                </TableCell>
               </TableRow>
             )}
 

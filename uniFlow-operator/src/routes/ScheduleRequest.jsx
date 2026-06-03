@@ -2,7 +2,6 @@ import { createSearchParams, useNavigate, useParams } from "react-router";
 import { useRequestState } from "../context/RequestContext";
 import ActivityForm from "@/components/ActivityForm";
 import { Separator } from "@/components/ui/separator";
-import RequestPageLayout from "@/components/RequestPageLayout";
 import PageHeader from "@/components/PageHeader";
 import RequestTwoColumnLayout from "@/components/RequestTwoColumnLayout";
 
@@ -32,20 +31,20 @@ const ScheduleRequest = () => {
   };
 
   return (
-    <RequestPageLayout>
-      <PageHeader
-        title="Create Activity"
-        description='Assign a technician and schedule the service request. The request will be moved to "Scheduled" status.'
-      />
-      <Separator className="mb-8" />
-      <RequestTwoColumnLayout request={request} rightTitle="Schedule">
-        <ActivityForm
-          request={request}
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
+    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+        <PageHeader
+          title="Create Activity"
+          description='Assign a technician and schedule the service request. The request will be moved to "Scheduled" status.'
         />
-      </RequestTwoColumnLayout>
-    </RequestPageLayout>
+        <Separator className="mb-8" />
+        <RequestTwoColumnLayout request={request} rightTitle="Schedule" showStatus>
+          <ActivityForm
+            request={request}
+            onSuccess={handleSuccess}
+            onCancel={handleCancel}
+          />
+        </RequestTwoColumnLayout>
+    </div>
   );
 };
 

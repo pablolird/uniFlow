@@ -23,7 +23,7 @@ export default function AppHeader() {
   };
 
   return (
-    <header className="flex justify-between relative items-center bg-card p-3 border-b border-stone-300">
+    <header className="flex bg-card justify-between relative items-center p-3 border-b border-stone-300">
       <div className="flex gap-1 p-1 bottom-0 left-0">
         {isSocketConnected ? (
           <>
@@ -55,7 +55,7 @@ export default function AppHeader() {
             <DropdownMenuItem className="" onClick={handleClick}>
               <LogOut className="text-red-500" />
               <span className="text-red-500">
-                {isAuthLoading ? <Spinner /> : "Logout"}
+                {isAuthLoading ? <Spinner /> : "Log out"}
               </span>
             </DropdownMenuItem>
           </DropdownMenuGroup>

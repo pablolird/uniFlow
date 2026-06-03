@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import AssetLink from "@/components/AssetLink";
 
 export default function ResolvedRequestInfo({ request }) {
   const [clientImages, setClientImages] = useState([]);
@@ -162,7 +163,9 @@ export default function ResolvedRequestInfo({ request }) {
 
           <TableRow className="h-min">
             <TableCell className="font-medium">Device Model</TableCell>
-            <TableCell>{request.device_model}</TableCell>
+            <TableCell>
+              <AssetLink model={request.device_model} id={request.asset_id} />
+            </TableCell>
           </TableRow>
 
           <TableRow className="h-min">

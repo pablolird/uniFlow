@@ -3,7 +3,9 @@ export default function PageHeader({ title, description, action }) {
     <div className={`mb-6 ${action ? "flex items-start justify-between" : ""}`}>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        <p className="text-sm max-w-xl text-muted-foreground mt-1">
+          {description}
+        </p>
       </div>
       {action}
     </div>

@@ -36,6 +36,7 @@ const RequestProvider = ({ children }) => {
         .padStart(2, "0")}/${date.getFullYear()}`;
       return {
         date: formatted,
+        asset_id: item.asset.id,
         request_id: item.id,
         request_status: item.status,
         request_type: item.type,
@@ -46,6 +47,7 @@ const RequestProvider = ({ children }) => {
         client_media: item.client_media || [],
         technician_media: item.technician_media || [],
         technician: item.technician ? item.technician.name : null,
+        technician_id: item.technician?.id || null,
         technician_notes: item.technician_notes || null,
         scheduled_date: item.scheduled_date || null,
         parent_id: item.parent_id || null,

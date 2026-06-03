@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, className = "" }) {
   const table = useReactTable({
     data,
     columns,
@@ -25,9 +25,9 @@ export function DataTable({ columns, data }) {
   });
 
   return (
-    <div className="w-5xl mx-10 h-9/11 flex flex-col gap-4">
-      <div className="rounded-md flex flex-2/3 flex-col overflow-hidden">
-        <Table>
+    <div className={`flex flex-col ${className}`}>
+      <div className="rounded-md flex flex-2/3 flex-col overflow-hidden w-full">
+        <Table className="table-auto">
           <TableHeader className="sticky top-0 z-10 bg-card shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

@@ -7,6 +7,10 @@ import DefaultHeader from "./ui/default-header";
 import { Toaster } from "sonner";
 import { useSearchParams } from "react-router";
 import FollowupBadge from "./FollowupBadge";
+import PageHeader from "@/components/PageHeader";
+import { Clock, CalendarClock, Wrench, CircleCheck, Archive } from "lucide-react";
+import TechnicianLink from "@/components/TechnicianLink";
+import AssetLink from "@/components/AssetLink";
 
 const columnHelper = createColumnHelper();
 const pending_columns = [
@@ -24,13 +28,16 @@ const pending_columns = [
   }),
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <AssetLink model={info.getValue()} id={info.row.original.asset_id} />
+    ),
   }),
   columnHelper.accessor("description", {
     header: (info) => <DefaultHeader info={info} name={"Description"} />,
     cell: (info) => {
       const value = info.getValue();
-      const truncated = value && value.length > 20 ? value.slice(0, 20) + "…" : value;
+      const truncated =
+        value && value.length > 20 ? value.slice(0, 20) + "…" : value;
       return (
         <span>
           {truncated}
@@ -77,8 +84,8 @@ const scheduled_columns = [
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
     cell: (info) => (
-      <span>
-        {info.getValue()}
+      <span className="inline-flex items-center gap-1">
+        <AssetLink model={info.getValue()} id={info.row.original.asset_id} />
         {info.row.original.parent_id && <FollowupBadge />}
       </span>
     ),
@@ -87,7 +94,12 @@ const scheduled_columns = [
     header: (info) => (
       <DefaultHeader info={info} name={"Assigned Technician"} />
     ),
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <TechnicianLink
+        name={info.getValue()}
+        id={info.row.original.technician_id}
+      />
+    ),
   }),
   columnHelper.accessor("show_request", {
     header: () => "Details",
@@ -127,8 +139,8 @@ const inprogress_columns = [
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
     cell: (info) => (
-      <span>
-        {info.getValue()}
+      <span className="inline-flex items-center gap-1">
+        <AssetLink model={info.getValue()} id={info.row.original.asset_id} />
         {info.row.original.parent_id && <FollowupBadge />}
       </span>
     ),
@@ -137,7 +149,12 @@ const inprogress_columns = [
     header: (info) => (
       <DefaultHeader info={info} name={"Assigned Technician"} />
     ),
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <TechnicianLink
+        name={info.getValue()}
+        id={info.row.original.technician_id}
+      />
+    ),
   }),
   columnHelper.accessor("show_request", {
     header: () => "Details",
@@ -178,8 +195,8 @@ const resolved_columns = [
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
     cell: (info) => (
-      <span>
-        {info.getValue()}
+      <span className="inline-flex items-center gap-1">
+        <AssetLink model={info.getValue()} id={info.row.original.asset_id} />
         {info.row.original.parent_id && <FollowupBadge />}
       </span>
     ),
@@ -194,7 +211,12 @@ const resolved_columns = [
   }),
   columnHelper.accessor("technician", {
     header: (info) => <DefaultHeader info={info} name={"Technician"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <TechnicianLink
+        name={info.getValue()}
+        id={info.row.original.technician_id}
+      />
+    ),
   }),
   columnHelper.accessor("resolve_activity", {
     header: () => "Close Activity",
@@ -235,8 +257,8 @@ const closed_columns = [
   columnHelper.accessor("device_model", {
     header: (info) => <DefaultHeader info={info} name={"Device Model"} />,
     cell: (info) => (
-      <span>
-        {info.getValue()}
+      <span className="inline-flex items-center gap-1">
+        <AssetLink model={info.getValue()} id={info.row.original.asset_id} />
         {info.row.original.parent_id && <FollowupBadge />}
       </span>
     ),
@@ -251,7 +273,12 @@ const closed_columns = [
   }),
   columnHelper.accessor("technician", {
     header: (info) => <DefaultHeader info={info} name={"Technician"} />,
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <TechnicianLink
+        name={info.getValue()}
+        id={info.row.original.technician_id}
+      />
+    ),
   }),
   columnHelper.accessor("show_request", {
     header: () => "Details",
@@ -266,6 +293,7 @@ const closed_columns = [
 
 export default function Dashboard() {
   const { requests } = useRequestState();
+  console.log(requests);
   const filteredRequests = {
     pending: requests.filter((r) => r.request_status === "PENDING"),
     scheduled: requests.filter((r) => r.request_status === "SCHEDULED"),
@@ -279,47 +307,64 @@ export default function Dashboard() {
   const defaultTab = searchParams.get("status") || "PENDING";
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden flex flex-col items-center">
       <Toaster></Toaster>
-      <Tabs
-        defaultValue={defaultTab}
-        className="bg-background w-full h-full flex flex-col justify-start items-center"
-      >
-        <TabsList className="mt-5">
-          <TabsTrigger value="PENDING">Pending</TabsTrigger>
-          <TabsTrigger value="SCHEDULED">Scheduled</TabsTrigger>
-          <TabsTrigger value="IN_PROGRESS">In progress</TabsTrigger>
-          <TabsTrigger value="RESOLVED">Resolved</TabsTrigger>
-          <TabsTrigger value="CLOSED">Closed</TabsTrigger>
-        </TabsList>
-        <TabsContent value="PENDING" className="h-full">
-          <DataTable
-            columns={pending_columns}
-            data={filteredRequests.pending}
+      <div className="w-fit h-full flex-col flex justify-start pt-10 items-center">
+        <div className="w-full">
+          <PageHeader
+            title="Service Requests"
+            description="This is a list of all service requests. Assign a date and a technician to pending requests and review any already resolved requests"
           />
-        </TabsContent>
-        <TabsContent className="h-full" value="SCHEDULED">
-          <DataTable
-            columns={scheduled_columns}
-            data={filteredRequests.scheduled}
-          />
-        </TabsContent>
-        <TabsContent className="h-full" value="IN_PROGRESS">
-          <DataTable
-            columns={inprogress_columns}
-            data={filteredRequests.in_progress}
-          />
-        </TabsContent>
-        <TabsContent className="h-full" value="RESOLVED">
-          <DataTable
-            columns={resolved_columns}
-            data={filteredRequests.resolved}
-          />
-        </TabsContent>
-        <TabsContent className="h-full" value="CLOSED">
-          <DataTable columns={closed_columns} data={filteredRequests.closed} />
-        </TabsContent>
-      </Tabs>
+        </div>
+
+        <Tabs
+          defaultValue={defaultTab}
+          className="background w-full h-full flex flex-col justify-start items-center"
+        >
+          <TabsList className="mt-5">
+            <TabsTrigger value="PENDING"><Clock className="w-3.5 h-3.5 mr-1.5" />Pending</TabsTrigger>
+            <TabsTrigger value="SCHEDULED"><CalendarClock className="w-3.5 h-3.5 mr-1.5" />Scheduled</TabsTrigger>
+            <TabsTrigger value="IN_PROGRESS"><Wrench className="w-3.5 h-3.5 mr-1.5" />In progress</TabsTrigger>
+            <TabsTrigger value="RESOLVED"><CircleCheck className="w-3.5 h-3.5 mr-1.5" />Resolved</TabsTrigger>
+            <TabsTrigger value="CLOSED"><Archive className="w-3.5 h-3.5 mr-1.5" />Closed</TabsTrigger>
+          </TabsList>
+          <TabsContent value="PENDING" className="h-full">
+            <DataTable
+              columns={pending_columns}
+              data={filteredRequests.pending}
+              className="max-w-5xl h-9/11"
+            />
+          </TabsContent>
+          <TabsContent className="h-full" value="SCHEDULED">
+            <DataTable
+              columns={scheduled_columns}
+              data={filteredRequests.scheduled}
+              className="max-w-5xl h-9/11"
+            />
+          </TabsContent>
+          <TabsContent className="h-full" value="IN_PROGRESS">
+            <DataTable
+              columns={inprogress_columns}
+              data={filteredRequests.in_progress}
+              className="max-w-5xl h-9/11"
+            />
+          </TabsContent>
+          <TabsContent className="h-full" value="RESOLVED">
+            <DataTable
+              columns={resolved_columns}
+              data={filteredRequests.resolved}
+              className="max-w-5xl h-9/11"
+            />
+          </TabsContent>
+          <TabsContent className="h-full" value="CLOSED">
+            <DataTable
+              columns={closed_columns}
+              data={filteredRequests.closed}
+              className="max-w-5xl h-9/11"
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

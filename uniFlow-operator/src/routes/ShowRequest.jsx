@@ -3,14 +3,13 @@ import { useRequestState } from "../context/RequestContext";
 import ActivityInfo from "@/components/ActivityInfo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import RequestPageLayout from "@/components/RequestPageLayout";
 import PageHeader from "@/components/PageHeader";
 import RequestTwoColumnLayout from "@/components/RequestTwoColumnLayout";
 import RequestNotFound from "@/components/RequestNotFound";
 
 const STATUS_LABELS = {
   SCHEDULED: "Scheduled Request",
-  IN_PROGRESS: "In Progress Request",
+  N_PROGRESS: "In Progress Request",
   CLOSED: "Closed Request",
 };
 
@@ -51,13 +50,17 @@ const ShowRequest = () => {
   );
 
   return (
-    <RequestPageLayout>
-      <PageHeader title={title} description={description} action={backButton} />
-      <Separator className="mb-8" />
-      <RequestTwoColumnLayout request={request} rightTitle="Activity Details">
-        <ActivityInfo request={request} />
-      </RequestTwoColumnLayout>
-    </RequestPageLayout>
+    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+        <PageHeader
+          title={title}
+          description={description}
+          action={backButton}
+        />
+        <Separator className="mb-8" />
+        <RequestTwoColumnLayout request={request} rightTitle="Activity Details">
+          <ActivityInfo request={request} />
+        </RequestTwoColumnLayout>
+    </div>
   );
 };
 

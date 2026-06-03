@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import { useNavigate } from "react-router";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import StatusBadge from "@/components/StatusBadge";
+import AssetLink from "@/components/AssetLink";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,7 +12,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
-export default function RequestInfo({ request }) {
+export default function RequestInfo({ request, showStatus = false }) {
   const [images, setImages] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -122,6 +124,12 @@ export default function RequestInfo({ request }) {
       <div className="max-w-xl">
         <Table>
           <TableBody>
+            {showStatus && (
+              <TableRow className="h-min">
+                <TableCell className="font-medium">Status</TableCell>
+                <TableCell><StatusBadge status={request.request_status} /></TableCell>
+              </TableRow>
+            )}
             <TableRow className="h-min">
               <TableCell className="font-medium">Date</TableCell>
               <TableCell>{request.date}</TableCell>
@@ -139,7 +147,9 @@ export default function RequestInfo({ request }) {
 
             <TableRow className="h-min">
               <TableCell className="font-medium">Device Model</TableCell>
-              <TableCell>{request.device_model}</TableCell>
+              <TableCell>
+                <AssetLink model={request.device_model} id={request.asset_id} />
+              </TableCell>
             </TableRow>
 
             <TableRow className="h-max">

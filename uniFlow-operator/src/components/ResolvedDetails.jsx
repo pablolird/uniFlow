@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import TechnicianLink from "@/components/TechnicianLink";
 
 export default function ResolvedDetails({ request }) {
   const [technicianImages, setTechnicianImages] = useState([]);
@@ -90,7 +91,12 @@ export default function ResolvedDetails({ request }) {
         <TableBody>
           <TableRow className="h-min">
             <TableCell className="font-medium">Assigned Technician</TableCell>
-            <TableCell>{request.technician || "N/A"}</TableCell>
+            <TableCell>
+              <TechnicianLink
+                name={request.technician}
+                id={request.technician_id}
+              />
+            </TableCell>
           </TableRow>
 
           <TableRow className="h-min">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AssetLink from "@/components/AssetLink";
 
 export default function Row({ request, overlay, overlayRequest }) {
   function handleClick() {
@@ -18,7 +19,7 @@ export default function Row({ request, overlay, overlayRequest }) {
         {request.requester}
       </td>
       <td className="border-b bg-white border-gray-300 p-2">
-        {request.device_model}
+        <AssetLink model={request.device_model} id={request.asset_id} />
       </td>
       <td className="border-b bg-white border-gray-300 p-2 max-w-xs overflow-hidden">
         {request.description}

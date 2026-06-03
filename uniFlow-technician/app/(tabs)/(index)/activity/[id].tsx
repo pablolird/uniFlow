@@ -35,6 +35,13 @@ export default function Activity() {
   const [qrError, setQrError] = useState("");
   const [isStarting, setIsStarting] = useState(false);
   const isProcessingStart = useRef(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (qrError) {
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+    }
+  }, [qrError]);
 
   // Find the request from either scheduled or finished lists
   const request = [...scheduledRequests, ...finishedRequests].find(
@@ -182,7 +189,7 @@ export default function Activity() {
       behavior="padding"
       className="border-t flex-1 border-t-gray-300 px-3 py-5"
     >
-      <ScrollView>
+      <ScrollView ref={scrollViewRef}>
         <ActivityInfo request={request} />
 
         <View className="items-center pb-5 mt-6">
@@ -259,6 +266,7 @@ function ActivityInProgress({
   const { refreshRequests } = useServiceRequests();
   const { accessToken } = useSession();
   const isProcessingFinish = useRef(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener(
@@ -510,8 +518,10 @@ function ActivityInProgress({
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
     <ScrollView
+      ref={scrollViewRef}
       className="flex-1 bg-white px-5 py-6"
       keyboardShouldPersistTaps="handled"
     >
@@ -614,6 +624,12 @@ function ActivityInProgress({
               value={followUpReason}
               onChangeText={setFollowUpReason}
               textAlignVertical="top"
+              onFocus={() =>
+                setTimeout(
+                  () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+                  300
+                )
+              }
             />
           </View>
         )}

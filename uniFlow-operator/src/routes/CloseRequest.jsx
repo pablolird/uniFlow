@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import useFetch from "@/hooks/UseFetch";
-import RequestPageLayout from "@/components/RequestPageLayout";
 import PageHeader from "@/components/PageHeader";
 import RequestTwoColumnLayout from "@/components/RequestTwoColumnLayout";
 import RequestNotFound from "@/components/RequestNotFound";
@@ -60,47 +59,47 @@ const CloseRequest = () => {
   if (!request) return <RequestNotFound />;
 
   return (
-    <RequestPageLayout>
-      <PageHeader
-        title="Resolve Request"
-        description="Review the completed service details and close the request."
-      />
-      <Separator className="mb-8" />
-      <RequestTwoColumnLayout request={request} rightTitle="Activity Details">
-        <ActivityInfo request={request} />
-      </RequestTwoColumnLayout>
+    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+        <PageHeader
+          title="Resolve Request"
+          description="Review the completed service details and close the request."
+        />
+        <Separator className="mb-8" />
+        <RequestTwoColumnLayout request={request} rightTitle="Activity Details">
+          <ActivityInfo request={request} />
+        </RequestTwoColumnLayout>
 
-      {error && (
-        <p className="text-sm text-destructive text-center mt-6">
-          {error?.response?.data?.message ||
-            error?.message ||
-            "Failed to close request"}
-        </p>
-      )}
+        {error && (
+          <p className="text-sm text-destructive text-center mt-6">
+            {error?.response?.data?.message ||
+              error?.message ||
+              "Failed to close request"}
+          </p>
+        )}
 
-      <Separator className="my-8" />
+        <Separator className="my-8" />
 
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          className="bg-card hover:bg-card/40"
-          disabled={submitting}
-          onClick={() =>
-            navigate({
-              pathname: "/",
-              search: createSearchParams({
-                status: request.request_status,
-              }).toString(),
-            })
-          }
-        >
-          Back
-        </Button>
-        <Button onClick={handleClose} disabled={submitting}>
-          {submitting ? <Spinner /> : "Close Request"}
-        </Button>
-      </div>
-    </RequestPageLayout>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="bg-card hover:bg-card/40"
+            disabled={submitting}
+            onClick={() =>
+              navigate({
+                pathname: "/",
+                search: createSearchParams({
+                  status: request.request_status,
+                }).toString(),
+              })
+            }
+          >
+            Back
+          </Button>
+          <Button onClick={handleClose} disabled={submitting}>
+            {submitting ? <Spinner /> : "Close Request"}
+          </Button>
+        </div>
+    </div>
   );
 };
 
