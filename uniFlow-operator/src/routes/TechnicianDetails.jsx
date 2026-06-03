@@ -95,7 +95,8 @@ const TechnicianDetails = () => {
   const backButton = <Button onClick={() => navigate(-1)}>Back</Button>;
 
   return (
-    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+    <div className="flex-1 overflow-y-auto">
+    <div className="container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
       <PageHeader
         title="Technician Details"
         description="These are the technician details and their associated service requests."
@@ -139,6 +140,7 @@ const TechnicianDetails = () => {
         </h2>
         <DataTable columns={request_columns} data={technicianRequests} />
       </div>
+    </div>
     </div>
   );
 };

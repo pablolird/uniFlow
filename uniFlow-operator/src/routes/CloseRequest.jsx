@@ -59,7 +59,8 @@ const CloseRequest = () => {
   if (!request) return <RequestNotFound />;
 
   return (
-    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+    <div className="flex-1 overflow-y-auto">
+    <div className="container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
         <PageHeader
           title="Resolve Request"
           description="Review the completed service details and close the request."
@@ -99,6 +100,7 @@ const CloseRequest = () => {
             {submitting ? <Spinner /> : "Close Request"}
           </Button>
         </div>
+    </div>
     </div>
   );
 };

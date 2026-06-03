@@ -17,7 +17,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { parse, format } from "date-fns";
+import { parse, format, startOfWeek } from "date-fns";
 import {
   Clock,
   CalendarClock,
@@ -73,20 +73,21 @@ const STATUS_CONFIG = [
 ];
 
 function computeRequestsOverTime(requests) {
-  const byMonth = {};
+  const byWeek = {};
   for (const r of requests) {
     try {
       const d = parse(r.date, "MM/dd/yyyy", new Date());
-      const key = format(d, "MMM yy");
-      if (!byMonth[key]) byMonth[key] = { count: 0, sortKey: d };
-      byMonth[key].count++;
+      const weekStart = startOfWeek(d, { weekStartsOn: 1 });
+      const key = format(weekStart, "MMM d");
+      if (!byWeek[key]) byWeek[key] = { count: 0, sortKey: weekStart };
+      byWeek[key].count++;
     } catch {
       // skip malformed dates
     }
   }
-  return Object.entries(byMonth)
+  return Object.entries(byWeek)
     .sort(([, a], [, b]) => a.sortKey - b.sortKey)
-    .map(([month, { count }]) => ({ month, count }));
+    .map(([week, { count }]) => ({ week, count }));
 }
 
 function computeTechnicianWorkload(requests) {
@@ -179,7 +180,7 @@ export default function Analytics() {
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="text-base">Requests Over Time</CardTitle>
-              <CardDescription>Monthly volume of service requests</CardDescription>
+              <CardDescription>Weekly volume of service requests</CardDescription>
             </CardHeader>
             <CardContent>
               {overTime.length === 0 ? (
@@ -196,7 +197,7 @@ export default function Analytics() {
                       stroke="#e2e8f0"
                     />
                     <XAxis
-                      dataKey="month"
+                      dataKey="week"
                       tick={{ fontSize: 11, fill: "#94a3b8" }}
                       axisLine={false}
                       tickLine={false}

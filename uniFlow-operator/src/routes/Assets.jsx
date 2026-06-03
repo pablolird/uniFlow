@@ -49,12 +49,14 @@ const Assets = () => {
 
   console.log(data);
   return (
-    <div className="flex justify-center flex-col max-w-5xl mx-auto py-10 px-6">
-      <PageHeader
-        title="Assets"
-        description="This is a list of all current available assets. Click view to see the asset details"
-      />
-      <DataTable className="pt-3" columns={columns} data={data} />
+    <div className="flex-1 overflow-y-auto">
+      <div className="max-w-4xl mx-auto py-10 px-6">
+        <PageHeader
+          title="Assets"
+          description="This is a list of all current available assets. Click view to see the asset details"
+        />
+        <DataTable className="pt-3" columns={columns} data={data} />
+      </div>
     </div>
   );
 };

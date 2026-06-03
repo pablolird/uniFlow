@@ -93,7 +93,8 @@ const AssetDetails = () => {
   const backButton = <Button onClick={() => navigate(-1)}>Back</Button>;
 
   return (
-    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+    <div className="flex-1 overflow-y-auto">
+    <div className="container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
       <PageHeader
         title="Asset Details"
         description="These are the asset details and their associated service requests."
@@ -141,6 +142,7 @@ const AssetDetails = () => {
         </h2>
         <DataTable columns={request_columns} data={assetRequests} />
       </div>
+    </div>
     </div>
   );
 };

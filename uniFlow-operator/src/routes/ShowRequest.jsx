@@ -50,7 +50,8 @@ const ShowRequest = () => {
   );
 
   return (
-    <div className="flex-1 container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
+    <div className="flex-1 overflow-y-auto">
+    <div className="container lg:block flex justify-center items-center flex-col max-w-5xl mx-auto py-10 px-6">
         <PageHeader
           title={title}
           description={description}
@@ -60,6 +61,7 @@ const ShowRequest = () => {
         <RequestTwoColumnLayout request={request} rightTitle="Activity Details">
           <ActivityInfo request={request} />
         </RequestTwoColumnLayout>
+    </div>
     </div>
   );
 };

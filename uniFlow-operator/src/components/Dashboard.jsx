@@ -201,14 +201,6 @@ const resolved_columns = [
       </span>
     ),
   }),
-  columnHelper.accessor("technician_notes", {
-    header: (info) => <DefaultHeader info={info} name={"Technician Notes"} />,
-    cell: (info) => {
-      const value = info.getValue();
-      if (!value) return "No notes";
-      return value.length > 30 ? value.slice(0, 30) + "…" : value;
-    },
-  }),
   columnHelper.accessor("technician", {
     header: (info) => <DefaultHeader info={info} name={"Technician"} />,
     cell: (info) => (
@@ -262,14 +254,6 @@ const closed_columns = [
         {info.row.original.parent_id && <FollowupBadge />}
       </span>
     ),
-  }),
-  columnHelper.accessor("technician_notes", {
-    header: (info) => <DefaultHeader info={info} name={"Technician Notes"} />,
-    cell: (info) => {
-      const value = info.getValue();
-      if (!value) return "No notes";
-      return value.length > 30 ? value.slice(0, 30) + "…" : value;
-    },
   }),
   columnHelper.accessor("technician", {
     header: (info) => <DefaultHeader info={info} name={"Technician"} />,

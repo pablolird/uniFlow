@@ -47,12 +47,14 @@ const Technicians = () => {
   if (isError) return <div>{error.message}</div>;
 
   return (
-    <div className="flex justify-center flex-col max-w-5xl mx-auto py-10 px-6">
-      <PageHeader
-        title="Technicians"
-        description="This is a list of all registered technicians. Click view to see the technician details and associated service requests."
-      />
-      <DataTable className="pt-3" columns={columns} data={data} />
+    <div className="flex-1 overflow-y-auto">
+      <div className="max-w-2xl mx-auto py-10 px-6">
+        <PageHeader
+          title="Technicians"
+          description="This is a list of all registered technicians. Click view to see the technician details and associated service requests."
+        />
+        <DataTable className="pt-3" columns={columns} data={data} />
+      </div>
     </div>
   );
 };
