@@ -1,5 +1,8 @@
 <div align="center">
-  <img width=960 alt="uniFlow" src="https://github.com/user-attachments/assets/fb4a77ca-3a25-4f2b-a4f0-6de52b1a52bc" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.svg" />
+    <img width="360" alt="uniFlow" src="docs/images/logo-light.svg" />
+  </picture>
 </div>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/pablolird/uniFlow)
@@ -26,7 +29,7 @@ This repository contains the **three frontends**. The NestJS + PostgreSQL backen
 ---
 
 <div align="center">
-  <img width="530" alt="uniflow-poster" src="https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2" />
+  <img width="530" alt="uniFlow capstone poster" src="docs/images/poster.jpg" />
 </div>
 
 ---
