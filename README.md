@@ -26,7 +26,7 @@ This repository contains the **three frontends**. The NestJS + PostgreSQL backen
 ---
 
 <div align="center">
-  <img height=750 alt="uniflow-poster" src="https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2" />
+  <img width="530" alt="uniflow-poster" src="https://github.com/user-attachments/assets/d718f55e-fb42-4583-88de-4fac661b07f2" />
 </div>
 
 ---
@@ -45,14 +45,14 @@ uniFlow was built by a team of two as a capstone project during an exchange seme
 ## 🔄 How It Works
 
 <div align="center">
-  <img width="760" alt="uniFlow architecture: three frontends on a shared NestJS API" src="docs/images/system-architecture-simplified.png" />
+  <img width="800" alt="uniFlow architecture: three frontends on a shared NestJS API" src="docs/images/system-architecture-simplified.png" />
 </div>
 
 <details>
 <summary><b>Detailed architecture</b> (endpoints, modules, storage)</summary>
 <br>
 <div align="center">
-  <img width="900" alt="Detailed uniFlow system architecture" src="docs/images/system-architecture.png" />
+  <img width="800" alt="Detailed uniFlow system architecture" src="docs/images/system-architecture.png" />
 </div>
 </details>
 
@@ -64,13 +64,13 @@ uniFlow was built by a team of two as a capstone project during an exchange seme
 ### Request lifecycle
 
 <div align="center">
-  <img width="760" alt="Request states: pending, scheduled, in progress, resolved, closed" src="docs/images/request-states.png" />
+  <img width="800" alt="Request states: pending, scheduled, in progress, resolved, closed" src="docs/images/request-states.png" />
 </div>
 
 Each role moves the request forward. The technician's two QR scans (① start, ② finish) gate the `IN_PROGRESS` and `RESOLVED` transitions, and a resolved job can spawn a linked follow-up request that starts the cycle again:
 
 <div align="center">
-  <img width="900" alt="Request lifecycle by role, including QR scans and follow-up requests" src="docs/images/request-lifecycle.png" />
+  <img width="800" alt="Request lifecycle by role, including QR scans and follow-up requests" src="docs/images/request-lifecycle.png" />
 </div>
 
 Every transition is pushed to open dashboards over WebSockets, so there is no polling or page refresh.
@@ -96,14 +96,14 @@ Every transition is pushed to open dashboards over WebSockets, so there is no po
 ### 1. Client Web Form (`uniFlow-client`)
 
 <div align="center">
-  <img width="760" alt="Client service request form" src="uniFlow-client/imgs/uniflow-client-form-page.png" />
+  <img width="353" alt="Client service request form" src="uniFlow-client/imgs/uniflow-client-form-page.png" />
+  <img width="447" alt="Client rating page" src="uniFlow-client/imgs/uniflow-client-rating-page.png" />
 </div>
 
 The public page opened by scanning a device's QR code. It contains the service request form (with photo upload), the rating page, and a printable page of every asset's QR code.
 
 <div align="center">
-  <img width="420" alt="Client rating page" src="uniFlow-client/imgs/uniflow-client-rating-page.png" />
-  <img width="420" alt="Printable asset QR codes page" src="uniFlow-client/imgs/uniflow-client-asset-qr-codes-page.png" />
+  <img width="560" alt="Printable asset QR codes page" src="uniFlow-client/imgs/uniflow-client-asset-qr-codes-page.png" />
 </div>
 
 **Stack:** React 19 · Vite · Tailwind CSS 4 · React Router · Axios · qrcode.react
@@ -113,15 +113,18 @@ The public page opened by scanning a device's QR code. It contains the service r
 ### 2. Operator Dashboard (`uniFlow-operator`)
 
 <div align="center">
-  <img width="900" alt="Operator dashboard home" src="uniFlow-operator/imgs/uniflow-operator-home-page.png" />
+  <img width="800" alt="Operator dashboard home" src="uniFlow-operator/imgs/uniflow-operator-home-page.png" />
 </div>
 
 A login-protected dashboard for managing every request: browse requests by status, schedule and assign technicians, close resolved work, browse assets and technicians, and view analytics. Status changes from technicians appear instantly across all open sessions.
 
 <div align="center">
-  <img width="280" alt="Operator login" src="uniFlow-operator/imgs/uniflow-operator-login-page.png" />
-  <img width="280" alt="Analytics page" src="uniFlow-operator/imgs/uniflow-operator-analytics-page.png" />
-  <img width="280" alt="Schedule request form" src="uniFlow-operator/imgs/uniflow-operator-schedule-request-form-page.png" />
+  <img width="277" alt="Operator login" src="uniFlow-operator/imgs/uniflow-operator-login-page.png" />
+  <img width="523" alt="Schedule request form" src="uniFlow-operator/imgs/uniflow-operator-schedule-request-form-page.png" />
+</div>
+<br>
+<div align="center">
+  <img width="700" alt="Analytics page" src="uniFlow-operator/imgs/uniflow-operator-analytics-page.png" />
 </div>
 
 **Stack:** React 19 · Vite · Tailwind CSS 4 · shadcn/ui (Radix) · TanStack Table · TanStack Query · React Hook Form + Zod · Recharts · Socket.io client
@@ -133,8 +136,8 @@ A login-protected dashboard for managing every request: browse requests by statu
 A React Native app for field technicians. It lists scheduled and finished jobs, shows each job's location, device, and the client's report, and uses the camera to scan the device's QR code at the start and end of each job. Technicians resolve jobs with notes and photos, or create a follow-up request.
 
 <div align="center">
-  <img width="420" alt="Login and scheduled jobs" src="uniFlow-technician/imgs/uniflow-technician-screens-login-scheduled.png" />
-  <img width="420" alt="Job in progress and finished jobs" src="uniFlow-technician/imgs/uniflow-technician-screens-inprogress-finished.png" />
+  <img width="400" alt="Login and scheduled jobs" src="uniFlow-technician/imgs/uniflow-technician-screens-login-scheduled.png" />
+  <img width="400" alt="Job in progress and finished jobs" src="uniFlow-technician/imgs/uniflow-technician-screens-inprogress-finished.png" />
 </div>
 
 **Stack:** React Native · Expo SDK 54 · Expo Router · NativeWind · expo-camera · expo-image-picker
