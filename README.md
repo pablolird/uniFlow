@@ -24,7 +24,7 @@
 
 **uniFlow** replaces the phone-call-and-chat-message workflow that many on-site repair companies still rely on. Every physical device (air conditioners, refrigerators, network equipment…) gets a QR code linked to the device and the company that owns it. Scanning the code opens a report form, the request lands on an operator dashboard in real time, and a technician handles the job on-site through a mobile app, scanning the same QR code to prove they are there. Clients are kept informed by email and can rate the service when it is done.
 
-This repository contains the **three frontends**. The NestJS + PostgreSQL backend lives in [vawms/backend-capstone](https://github.com/vawms/backend-capstone).
+This repository contains the **three frontends**. The NestJS + PostgreSQL backend, built by Alejandro Adorno, lives in [backend-capstone](https://github.com/vawms/backend-capstone).
 
 ---
 
@@ -36,12 +36,12 @@ This repository contains the **three frontends**. The NestJS + PostgreSQL backen
 
 ## 👥 Team
 
-uniFlow was built by a team of two as a capstone project during an exchange semester at NTUST.
+uniFlow was built by a team of two as a capstone project over two semesters at NTUST, as part of a three-semester exchange program, under the supervision of **Prof. Tai-Lin Chin**.
 
 | Part | Author |
 | --- | --- |
 | Frontends: client web form, operator dashboard, technician mobile app (this repo) | [Pablo Lird](https://github.com/pablolird) |
-| Backend API, database, email and PDF reports ([backend-capstone](https://github.com/vawms/backend-capstone)) | [@vawms](https://github.com/vawms) |
+| Backend API, database, email and PDF reports ([backend-capstone](https://github.com/vawms/backend-capstone)) | [Alejandro Adorno](https://github.com/vawms) |
 
 ---
 
@@ -238,7 +238,7 @@ Seed logins from the backend's QA setup: operator `operator` / `operator123`, te
 
 ## 🔗 Related
 
-- **Backend**: [vawms/backend-capstone](https://github.com/vawms/backend-capstone)
+- **Backend** (Alejandro Adorno): [backend-capstone](https://github.com/vawms/backend-capstone)
 
 ---
 
