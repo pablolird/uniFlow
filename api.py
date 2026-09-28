@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parent
+
 if len(sys.argv) != 2:
     print("Usage: python api.py <IP:PORT>")
     sys.exit(1)
@@ -15,15 +17,15 @@ else:
 
 TARGETS = [
     {
-        "path": Path("dashboard-react/.env"),
+        "path": ROOT / "uniFlow-operator/.env",
         "key": "VITE_API_BASE_URL",
     },
     {
-        "path": Path("form-react/form-react/.env"),
+        "path": ROOT / "uniFlow-client/.env",
         "key": "VITE_API_BASE_URL",
     },
     {
-        "path": Path("uniFlow/.env"),
+        "path": ROOT / "uniFlow-technician/.env",
         "key": "EXPO_PUBLIC_API_BASE_URL",
     },
 ]

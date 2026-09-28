@@ -15,11 +15,13 @@
 ![TailwindCSS Badge](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=fff&style=for-the-badge)
 ![Socket.io Badge](https://img.shields.io/badge/Socket.io-010101?logo=socketdotio&logoColor=fff&style=for-the-badge)
 
-# uniFlow — Unified Workflow for Technical Service Management
+# uniFlow: Unified Workflow for Technical Service Management
 
-> 🏆 **Winner of the Outstanding Performance Award** — Capstone Project Competition 2025, NTUST
+> 🏆 **Outstanding Performance Award (1st place)**: Capstone Project Competition 2025, National Taiwan University of Science and Technology (NTUST)
 
-**UniFlow** automates the end-to-end lifecycle of technical service requests. QR codes attached to physical devices (air conditioners, refrigerators, and other equipment) link each asset to its owner company. Scanning a code opens a report form, the request flows through an operator dashboard, and a technician handles the task on-site via a mobile app — with every stage tracked in real time.
+**uniFlow** replaces the phone-call-and-chat-message workflow that many on-site repair companies still rely on. Every physical device (air conditioners, refrigerators, network equipment…) gets a QR code linked to the device and the company that owns it. Scanning the code opens a report form, the request lands on an operator dashboard in real time, and a technician handles the job on-site through a mobile app, scanning the same QR code to prove they are there. Clients are kept informed by email and can rate the service when it is done.
+
+This repository contains the **three frontends**. The NestJS + PostgreSQL backend lives in [vawms/backend-capstone](https://github.com/vawms/backend-capstone).
 
 ---
 
@@ -29,38 +31,64 @@
 
 ---
 
+## 👥 Team
+
+uniFlow was built by a team of two as a capstone project during an exchange semester at NTUST.
+
+| Part | Author |
+| --- | --- |
+| Frontends: client web form, operator dashboard, technician mobile app (this repo) | [Pablo Lird](https://github.com/pablolird) |
+| Backend API, database, email and PDF reports ([backend-capstone](https://github.com/vawms/backend-capstone)) | [@vawms](https://github.com/vawms) |
+
+---
+
 ## 🔄 How It Works
 
-1. **Device Report (Client)** — A QR code is affixed to each device. When the device needs service, anyone can scan the QR code and fill out a short form describing the issue and attaching multimedia.
-2. **Operator Dashboard** — All incoming requests land in the operator's web dashboard. The operator reviews the report and assigns the task to an available technician from the database.
-3. **Technician Mobile App** — The assigned technician receives the task on their phone, sees where to go and what to do, then scans the device QR code to **start** the task and again to **finish** it.
-4. **Real-Time Visibility** — Every stage transition is broadcast instantly via WebSockets so the operator always sees live status.
+```mermaid
+flowchart LR
+    QR[QR code on device] -->|scan| C[Client web form]
+    C -->|HTTP| API[(NestJS API<br/>+ PostgreSQL)]
+    O[Operator dashboard] <-->|HTTP| API
+    API -.->|Socket.io push| O
+    T[Technician mobile app] <-->|HTTP| API
+    T -->|scan to start / finish| QR
+    API -->|email, PDF report,<br/>rating link| C
+```
+
+1. **Report (client).** Anyone scans the device's QR code, describes the issue, and attaches photos. No account is needed.
+2. **Schedule (operator).** The request appears live on the operator dashboard. The operator reviews it, picks a date, and assigns a technician.
+3. **Fix (technician).** The technician sees the job, its location, the device, and the client's description and photos in the mobile app. They scan the device's QR code to **start** the job and again to **finish** it, adding notes and photos. If another visit is needed, they create a linked **follow-up request**.
+4. **Close (operator and client).** The operator reviews and closes the request. The client receives a PDF completion report and a link to rate the service.
+
+Requests move through `PENDING → SCHEDULED → IN_PROGRESS → RESOLVED → CLOSED`. Every transition is pushed to open dashboards over WebSockets, so there is no polling or page refresh.
 
 ---
 
 ## 🌟 Features
 
-- **QR Code Integration**: Each device has a unique QR code tied to it and its owner company.
-- **Multimedia Reports**: Clients can attach photos and videos to their service requests.
-- **Operator Assignment**: Operators can browse all technicians and assign tasks directly from the dashboard.
-- **Live Status Updates**: Activity states update in real time via Socket.io — no page refreshes needed.
-- **QR-Gated Task Flow**: Technicians must scan the device QR code to start and to complete a task, ensuring on-site presence.
-- **Full Activity Lifecycle**: Requests move through well-defined stages, all visible to the operator in real time.
-- **Cross-Platform**: Web frontends for clients and operators; native mobile app for technicians (iOS & Android via Expo).
+- **QR-based intake.** Each device has a unique QR code tied to it and its owner company. A printable QR codes page is included.
+- **Photo attachments.** Clients attach photos to their reports, and technicians attach photos when resolving a job.
+- **Real-time dashboard.** Socket.io events update request rows in place and raise toast notifications.
+- **QR-gated jobs.** Technicians must scan the device's code to start and to finish a job, which confirms they are on-site.
+- **Follow-up requests.** Unfinished work spawns a linked child request that goes back to the operator's queue.
+- **Ratings.** Clients rate the service after the request is closed.
+- **Analytics.** Status counts, weekly request volume, follow-up rate, and workload per technician.
+- **Asset and technician views.** Browse each device's and each technician's request history.
+- **Secure sessions.** Operator access tokens live only in memory, and sessions are silently renewed through an HttpOnly refresh cookie.
 
 ---
 
 ## 📱 Front-Ends
 
-### 1. Client Form (`uniFlow-client`)
+### 1. Client Web Form (`uniFlow-client`)
 
 <div align="center">
   <img width="450" height="600" alt="uniflow-client" src="https://github.com/user-attachments/assets/2bbebbf1-f035-42ca-851a-fb24aabaa9f2" />
 </div>
 
-A lightweight React web app served when a device QR code is scanned. The client fills out a form describing the issue and can attach photos or videos before submitting.
+The public page opened by scanning a device's QR code. It contains the service request form (with photo upload), the rating page, and a printable page of every asset's QR code.
 
-**Stack:** React 19 · Vite · React Router · Axios
+**Stack:** React 19 · Vite · Tailwind CSS 4 · React Router · Axios · qrcode.react
 
 ---
 
@@ -70,35 +98,44 @@ A lightweight React web app served when a device QR code is scanned. The client 
 <img width="550" height="360" alt="uniflow-operator" src="https://github.com/user-attachments/assets/60e26276-c4e0-438d-acc7-6a6de0ecd99c" />
 </div>
 
-A full-featured web dashboard where operators manage incoming service requests. Built with real-time Socket.io integration so activity state changes appear instantly across all open sessions.
+A login-protected dashboard for managing every request: browse requests by status, schedule and assign technicians, close resolved work, browse assets and technicians, and view analytics. Status changes from technicians appear instantly across all open sessions.
 
-**Stack:** React 19 · Vite · Tailwind CSS · Radix UI · TanStack Table · Socket.io · Axios
+<div align="center">
+  <img width="420" alt="Analytics page" src="uniFlow-operator/imgs/uniflow-operator-analytics-page.png" />
+  <img width="420" alt="Schedule request form" src="uniFlow-operator/imgs/uniflow-operator-schedule-request-form-page.png" />
+</div>
+
+**Stack:** React 19 · Vite · Tailwind CSS 4 · shadcn/ui (Radix) · TanStack Table · TanStack Query · React Hook Form + Zod · Recharts · Socket.io client
 
 ---
 
 ### 3. Technician Mobile App (`uniFlow-technician`)
 
-
 <div align="center">
 <img width="250" height="400" alt="uniflow-technician" src="https://github.com/user-attachments/assets/18e299c9-2190-4087-abf9-4614715f2ff0" />
 </div>
 
-A React Native mobile app for field technicians. Shows assigned tasks with location and device details, and uses the device camera to scan QR codes at the start and end of each job.
+A React Native app for field technicians. It lists scheduled and finished jobs, shows each job's location, device, and the client's report, and uses the camera to scan the device's QR code at the start and end of each job. Technicians resolve jobs with notes and photos, or create a follow-up request.
 
-**Stack:** React Native · Expo · Expo Router · NativeWind · expo-camera · expo-image-picker
+<div align="center">
+  <img width="420" alt="Login and scheduled jobs" src="uniFlow-technician/imgs/uniflow-technician-screens-login-scheduled.png" />
+  <img width="420" alt="Job in progress and finished jobs" src="uniFlow-technician/imgs/uniflow-technician-screens-inprogress-finished.png" />
+</div>
+
+**Stack:** React Native · Expo SDK 54 · Expo Router · NativeWind · expo-camera · expo-image-picker
 
 ---
 
 ## 🛠️ Technologies
 
-| Layer              | Technology                                                                  |
-| ------------------ | --------------------------------------------------------------------------- |
-| Client Form        | React 19, Vite, React Router, Axios                                         |
-| Operator Dashboard | React 19, Vite, Tailwind CSS 4, Radix UI, TanStack Table, Socket.io         |
-| Technician App     | React Native, Expo 54, Expo Router, NativeWind, expo-camera                 |
-| Real-Time          | Socket.io (WebSockets)                                                      |
-| Language           | TypeScript / JavaScript                                                     |
-| Backend            | Node.js — see [backend-capstone](https://github.com/vawms/backend-capstone) |
+| Layer              | Technology                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Client Form        | React 19, Vite, Tailwind CSS 4, React Router, Axios                                     |
+| Operator Dashboard | React 19, Vite, Tailwind CSS 4, shadcn/ui, TanStack Table & Query, Recharts, Socket.io  |
+| Technician App     | React Native, Expo SDK 54, Expo Router, NativeWind, expo-camera                         |
+| Real-Time          | Socket.io (WebSockets)                                                                  |
+| Language           | JavaScript / TypeScript                                                                 |
+| Backend            | NestJS, TypeORM, PostgreSQL: see [backend-capstone](https://github.com/vawms/backend-capstone) |
 
 ---
 
@@ -106,106 +143,75 @@ A React Native mobile app for field technicians. Shows assigned tasks with locat
 
 ```
 uniFlow/
+├── api.py                  # Sets the backend URL in all three apps' .env files
+├── start-dev.sh            # Starts all three frontends in one tmux session
 │
-├── api.py                        # Helper script to update API base URL across all frontends
-├── start-dev.sh                  # Launches all three apps in a tmux session
+├── uniFlow-client/         # Public QR landing page (web)
+│   └── src/
+│       ├── pages/          # ReportForm, RatingPage, QrsPage, NotFound
+│       └── components/     # Form, RatingForm, StatusCard, Success, Loading
 │
-├── uniFlow-client/               # Client-facing report form (web)
-│   └── form-react/
-│       └── form-react/
-│           ├── src/
-│           │   ├── pages/        # ReportForm page
-│           │   └── components/   # Form, Success, Loading
-│           └── package.json
+├── uniFlow-operator/       # Operator dashboard (web)
+│   └── src/
+│       ├── routes/         # Dashboard, ShowRequest, ScheduleRequest, CloseRequest,
+│       │                   # Assets, Technicians, Analytics, Login
+│       ├── context/        # Auth, requests + Socket.io, overlays
+│       ├── hooks/          # Data-fetching hooks
+│       └── components/     # Request views, forms, sidebar, ui/ (shadcn primitives)
 │
-├── uniFlow-operator/             # Operator dashboard (web)
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── RequestContext.jsx    # Global state for requests & activities
-│   │   └── components/
-│   │       ├── Dashboard.jsx
-│   │       ├── ActivityDetails.jsx
-│   │       ├── RequestInfo.jsx
-│   │       └── ui/              # Reusable UI primitives (dialog, table, button…)
-│   └── package.json
-│
-└── uniFlow-technician/           # Technician mobile app (React Native / Expo)
-    ├── app/                      # Expo Router file-based routing
-    │   └── (tabs)/               # Tab screens
-    ├── components/               # ActivityInfo, ActivityInProgress, ServiceCard…
-    ├── contexts/                 # Auth & activity context providers
-    ├── services/                 # API service layer
-    └── package.json
+└── uniFlow-technician/     # Technician mobile app (React Native / Expo)
+    ├── app/                # Expo Router screens: sign-in, jobs, job detail, QR scanner
+    ├── components/         # ServiceCard, ActivityInfo, ActivityInProgress, FinishedCard
+    ├── contexts/           # Auth and service-request providers
+    └── services/           # API client
 ```
 
 ---
 
-## 🚀 Setup and Installation
+## 🚀 Running Locally
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or a compatible package manager
-- Expo Go app (for running the mobile app on a physical device) or an iOS/Android simulator
-- Backend running — see [backend-capstone](https://github.com/vawms/backend-capstone)
+- Docker (for the backend)
+- Expo Go on a phone, or an iOS/Android simulator
+- The backend running: see [backend-capstone](https://github.com/vawms/backend-capstone) (`./scripts/qa.sh` starts the API and a seeded database on port 3000)
 
-### 1. Clone the Repository
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/pablolird/uniFlow.git
 cd uniFlow
+(cd uniFlow-client && npm install)
+(cd uniFlow-operator && npm install)
+(cd uniFlow-technician && npm install)
 ```
 
-### 2. Configure the API URL
-
-All three frontends read the backend URL from environment variables. You can update them all at once using the helper script:
+### 2. Point the apps at the backend
 
 ```bash
-python api.py
+python3 api.py <your-backend-ip>:3000
 ```
 
-Or set them manually in each `.env` file:
+This writes `VITE_API_BASE_URL` (client and operator) and `EXPO_PUBLIC_API_BASE_URL` (technician) to each app's `.env`. Use your machine's LAN IP rather than `localhost` so the phone can reach the backend.
 
-```
-VITE_API_BASE_URL=http://<your-backend-ip>:3000      # for client & operator
-EXPO_PUBLIC_API_BASE_URL=http://<your-backend-ip>:3000  # for technician
-```
+### 3. Run
 
-### 3. Install Dependencies
-
-```bash
-# Client form
-cd uniFlow-client/form-react/form-react && npm install
-
-# Operator dashboard
-cd ../../../uniFlow-operator && npm install
-
-# Technician app
-cd ../uniFlow-technician && npm install
-```
-
-### 4. Run the Apps
-
-**All at once (requires tmux):**
+All at once (requires tmux):
 
 ```bash
 ./start-dev.sh
 ```
 
-**Individually:**
+Or individually:
 
 ```bash
-# Client form (port 5173)
-cd uniFlow-client/form-react/form-react && npm run dev
-
-# Operator dashboard (port 4000)
-cd uniFlow-operator && npm run dev -- --port 4000
-
-# Technician mobile app
-cd uniFlow-technician && npx expo start
+cd uniFlow-client && npm run dev                          # http://localhost:5555
+cd uniFlow-operator && npm run dev -- --port 4000         # http://localhost:4000
+cd uniFlow-technician && npx expo start                   # scan the QR with Expo Go
 ```
 
-Scan the QR code printed by Expo with the **Expo Go** app, or press `i`/`a` to open an iOS/Android simulator.
+Seed logins from the backend's QA setup: operator `operator` / `operator123`, technician `sarah.m@techcorp.com` / `tech123`.
 
 ---
 

@@ -41,3 +41,9 @@ app-example
 # generated native folders
 /ios
 /android
+
+# report drafts and PDFs (contain student IDs)
+docs/report/
+
+# backups
+*.bak
